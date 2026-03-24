@@ -1,0 +1,61 @@
+package server.repositories;
+
+import server.database.DatabaseManager;
+import server.model.*;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.UUID;
+
+public class EmailRepository {
+    public ArrayList<Email> getUserEmails(UUID userId) {
+        var con = DatabaseManager.getConnection();
+        try {
+            PreparedStatement statement = con.prepareStatement("SELECT email_id, sender_id, receiver_id, subject, body, sent_at," +
+                    "sender.user_id as sender_id, sender.username as sender_username, " +
+                    "sender.email as sender_email," +
+                    "sender.created_at as sender_created_at," +
+                    "receiver.user_id as receiver_id, receiver.username as receiver_username," +
+                    "receiver.email as receiver_email," +
+                    "receiver.created_at as receiver_created_at " +
+                    "FROM emails " +
+                    "LEFT JOIN users as sender ON emails.sender_id = sender.user_id " +
+                    "LEFT JOIN users as receiver ON emails.receiver_id = receiver.user_id " +
+                    "WHERE emails.sender_id = ? OR emails.receiver_id = ?");
+            statement.setObject(1, userId);
+            statement.setObject(2, userId);
+            var rows = statement.executeQuery();
+            System.out.println(rows.toString());
+            ArrayList<Email> result = new ArrayList<Email>();
+            while (rows.next()) {
+                result.add(new Email(
+                        UUID.fromString(rows.getString("email_id")),
+                        UUID.fromString(rows.getString("sender_id")),
+                        UUID.fromString(rows.getString("receiver_id")),
+                        rows.getString("subject"),
+                        rows.getString("body"),
+                        rows.getObject("sent_at", OffsetDateTime.class),
+                        new User(
+                                rows.getObject("sender_id", UUID.class),
+                                rows.getString("sender_username"),
+                                rows.getString("sender_email"),
+                                rows.getObject("sender_created_at", OffsetDateTime.class)
+                        ),
+                        new User(
+                                rows.getObject("receiver_id", UUID.class),
+                                rows.getString("receiver_username"),
+                                rows.getString("receiver_email"),
+                                rows.getObject("receiver_created_at", OffsetDateTime.class)
+                        )
+                ));
+            }
+
+            return result;
+        } catch (SQLException ex) {
+            System.out.println(ex.toString());
+            return new ArrayList<>();
+        }
+    }
+}

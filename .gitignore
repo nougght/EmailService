@@ -1,0 +1,48 @@
+# Unified .gitignore for client and server Maven modules
+
+# Maven build output
+/client/target/
+/server/target/
+/target/
+**/target/
+*.log
+
+# Wrapper
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Gradle build
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# Optional: compiled classes
+**/*.class
