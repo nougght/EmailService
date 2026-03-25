@@ -25,7 +25,7 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        TcpClient tcpClient = new TcpClient("127.0.0.1", 3741);
+        TcpClient tcpClient = new TcpClient("localhost", 3741);
         DataStorage storage = new DataStorage();
         SessionService sessionService = new SessionService(tcpClient);
 
@@ -36,19 +36,19 @@ public class HelloApplication extends Application {
                 storage
         );
 
-//        tcpClient.start();
-//        // temp
-//        System.out.println("start session");
-//        emailService.getUserByUserId(UUID.fromString("94c33924-fe82-46b1-9d2b-84942a7da794")).
-//                thenAccept(u -> {
-//                    storage.addUser(u.get());
-//                    sessionService.setSession(u.get());
-//                });
+        tcpClient.start();
+        // temp
+        System.out.println("start session");
+        emailService.getUserByUserId(UUID.fromString("94c33924-fe82-46b1-9d2b-84942a7da794")).
+                thenAccept(u -> {
+                    storage.addUser(u.get());
+                    sessionService.setSession(u.get());
+                });
 
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("registration-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
         Parent root = fxmlLoader.load();
-//        HelloController controller = fxmlLoader.getController();
-//        controller.setViewModel(new EmailViewModel(emailService, sessionService));
+        HelloController controller = fxmlLoader.getController();
+        controller.setViewModel(new EmailViewModel(emailService, sessionService));
 
         Scene scene = new Scene(root, 320, 240);
         stage.setTitle("Hello!");

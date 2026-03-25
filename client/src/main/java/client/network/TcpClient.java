@@ -14,9 +14,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import javax.net.ssl.*;
 import java.io.*;
 import java.net.Socket;
+import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -30,7 +33,7 @@ public class TcpClient extends Thread {
     private int sPort;
 
     private TcpListener serverListener;
-    private Socket socket;
+    private SSLSocket socket;
     private BufferedReader sIn = null;
     private PrintWriter sOut = null;
     final private ObjectMapper jsonMapper = new ObjectMapper();
@@ -52,7 +55,24 @@ public class TcpClient extends Thread {
         super.run();
         System.out.println("Connecting...");
         try {
-            socket = new Socket(sHost, sPort);
+            KeyStore ts = KeyStore.getInstance("JKS");
+            InputStream in = getClass().getClassLoader().getResourceAsStream("client/truststore.jks");
+            System.out.println(in);
+            ts.load(in, "49Kst0rE/701".toCharArray());
+            Enumeration<String> aliases = ts.aliases();
+            while (aliases.hasMoreElements()) {
+                String alias = aliases.nextElement();
+                System.out.println(alias + " -> " + ts.getCertificate(alias).getPublicKey());
+            }
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(ts);
+
+            SSLContext ctx = SSLContext.getInstance("TLS");
+            ctx.init(null, tmf.getTrustManagers(), null);
+
+            SSLSocketFactory ssf = ctx.getSocketFactory();
+            socket = (SSLSocket) ssf.createSocket(sHost, sPort);
+
             System.out.print("Connected: ");
             System.out.println(socket.getInetAddress());
             sIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
