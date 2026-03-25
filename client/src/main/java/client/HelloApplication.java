@@ -1,12 +1,14 @@
 package client;
 
-import client.mapper.EmailMapper;
-import client.mapper.UserMapper;
+import java.io.IOException;
+import java.util.UUID;
+
 import client.network.TcpClient;
+import client.service.AuthService;
 import client.service.EmailService;
 import client.service.SessionService;
 import client.storage.DataStorage;
-import client.view.EmailController;
+import client.view.HelloController;
 import client.viewModel.EmailViewModel;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -18,38 +20,35 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-import java.util.UUID;
-
 public class HelloApplication extends Application {
+
     @Override
     public void start(Stage stage) throws IOException {
 
         TcpClient tcpClient = new TcpClient("127.0.0.1", 3741);
         DataStorage storage = new DataStorage();
         SessionService sessionService = new SessionService(tcpClient);
-        EmailMapper emailMapper = new EmailMapper();
-        UserMapper userMapper = new UserMapper();
 
+        AuthService authService = new AuthService(tcpClient, sessionService, storage);
         EmailService emailService = new EmailService(
                 tcpClient,
                 sessionService,
-                storage,
-                emailMapper,
-                userMapper
+                storage
         );
 
-        tcpClient.start();
-        // temp
-        System.out.println("start session");
-        emailService.getUserByUserId(UUID.fromString("94c33924-fe82-46b1-9d2b-84942a7da794")).
-                thenAccept(u -> {storage.addUser(u.get()); sessionService.setSession(u.get());});
+//        tcpClient.start();
+//        // temp
+//        System.out.println("start session");
+//        emailService.getUserByUserId(UUID.fromString("94c33924-fe82-46b1-9d2b-84942a7da794")).
+//                thenAccept(u -> {
+//                    storage.addUser(u.get());
+//                    sessionService.setSession(u.get());
+//                });
 
-
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("registration-view.fxml"));
         Parent root = fxmlLoader.load();
-        HelloController controller = fxmlLoader.getController();
-        controller.setViewModel(new EmailViewModel(emailService, sessionService));
+//        HelloController controller = fxmlLoader.getController();
+//        controller.setViewModel(new EmailViewModel(emailService, sessionService));
 
         Scene scene = new Scene(root, 320, 240);
         stage.setTitle("Hello!");

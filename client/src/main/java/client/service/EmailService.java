@@ -1,5 +1,11 @@
 package client.service;
 
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
 import client.dto.EmailDTO;
 import client.dto.UserDTO;
 import client.mapper.EmailMapper;
@@ -11,27 +17,16 @@ import client.storage.DataStorage;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 
-import javax.swing.text.PlainView;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
 public class EmailService {
     final private TcpClient tcpClient;
     final private SessionService sessionService;
     final private DataStorage storage;
-    final private EmailMapper emailMapper;
-    final private UserMapper userMapper;
 
-    public EmailService(TcpClient tcpClient, SessionService sessionService, DataStorage storage, EmailMapper emailMapper,
-                        UserMapper userMapper) {
+    public EmailService(TcpClient tcpClient, SessionService sessionService, DataStorage storage) {
         this.tcpClient = tcpClient;
         this.sessionService = sessionService;
         this.storage = storage;
-        this.emailMapper = emailMapper;
-        this.userMapper = userMapper;
+        
 
         sessionService.addListener(s -> {
             //temp: нужно исключить возможность гонки данных, реализовать возможность отмены задачи
@@ -105,7 +100,7 @@ public class EmailService {
 //    }
 
     public User convert(UserDTO dto) {
-        var user = userMapper.fromDTO(dto);
+        var user = UserMapper.fromDTO(dto);
         return user;
     }
 
@@ -114,7 +109,7 @@ public class EmailService {
         var receiverFuture = getUserByUserId(dto.getReceiverId());
         // дожидаемся завершения всех асинхронных функций
         return CompletableFuture.allOf(senderFuture, receiverFuture).thenApply(v -> {
-            var email = emailMapper.fromDTO(dto);
+            var email = EmailMapper.fromDTO(dto);
             email.setSender(senderFuture.join().get());
             email.setReceiver(receiverFuture.join().get());
             // возвращаем полученные данные

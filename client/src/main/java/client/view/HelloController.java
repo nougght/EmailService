@@ -1,7 +1,6 @@
-package client;
+package client.view;
 
 import client.model.Email;
-import client.model.User;
 import client.viewModel.EmailViewModel;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
@@ -16,8 +15,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-
-import java.util.UUID;
 
 public class HelloController {
 

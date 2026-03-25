@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fitToHeight="true" fitToWidth="true" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.view.LoginController">
+   <content>
+      <StackPane prefHeight="457.0" prefWidth="484.0">
+          <padding>
+              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+          </padding>
+         <children>
+            <VBox alignment="CENTER" maxHeight="275.0" maxWidth="300" spacing="20.0">
+            
+                <Label fx:id="loginLabel" text="Вход" />
+                <TextField fx:id="usernameInput" promptText="Имя пользователя" />
+                <PasswordField fx:id="passwordInput" promptText="********"/>
+                <Label fx:id="warningLabel" />
+                <Button fx:id="loginButton" onAction="#handleLoginClick" text="Войти" textAlignment="CENTER" />
+               <AnchorPane>
+                  <children>
+                      <Button fx:id="toRegistrationButton" AnchorPane.rightAnchor="5.0" onAction="#handleToRegistrationClick" text="Создать аккаунт" textAlignment="CENTER" />
+                  </children>
+               </AnchorPane>
+            
+            
+            </VBox>
+         </children>
+      </StackPane>
+   </content>
+</ScrollPane>
