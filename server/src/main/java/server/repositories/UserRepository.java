@@ -36,5 +36,25 @@ public class UserRepository {
         }
         return Optional.empty();
     }
+
+    public void addUser(User user)
+    {
+        var con = DatabaseManager.getConnection();
+        try {
+            PreparedStatement st = con.prepareStatement("INSERT INTO users (user_id, username, email) " +
+                "VALUES (?, ?, ?)"
+            );
+
+            st.setObject(1, user.getUserId());
+            st.setObject(2, user.getUsername());
+            st.setObject(3, user.getEmail());
+
+            st.executeUpdate();
+
+        } catch(SQLException e)
+        {
+            System.out.println("SQLException " + e.toString());
+        }
+    }
     
 }

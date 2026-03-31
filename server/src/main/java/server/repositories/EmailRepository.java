@@ -58,4 +58,24 @@ public class EmailRepository {
             return new ArrayList<>();
         }
     }
+
+    public void addEmail(Email email) {
+        var con = DatabaseManager.getConnection();
+        try {
+            PreparedStatement st = con.prepareStatement("INSERT INTO emails (email_id, sender_id, receiver_id, subject, body, sent_at) " +
+                    "VALUES (?, ?, ?, ?, ?)");
+
+            st.setObject(1, email.getEmailId());
+            st.setObject(2, email.getSenderId());
+            st.setObject(3, email.getReceiverId());
+            st.setObject(4, email.getSubject());
+            st.setObject(5, email.getBody());
+
+            st.executeUpdate();
+
+
+        } catch (SQLException e) {
+            System.out.println("SQLException " + e.toString());
+        }
+    }
 }

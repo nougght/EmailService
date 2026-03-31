@@ -19,4 +19,9 @@ public class UserService {
         return existing;
     }
 
+    public void addUser(User user)
+    {
+        userRepo.addUser(user);
+    }
+
 }
