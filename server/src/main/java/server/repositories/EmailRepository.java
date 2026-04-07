@@ -40,12 +40,14 @@ public class EmailRepository {
                         new User(
                                 rows.getObject("sender_id", UUID.class),
                                 rows.getString("sender_username"),
+                                null,
                                 rows.getString("sender_email"),
                                 rows.getObject("sender_created_at", OffsetDateTime.class)
                         ),
                         new User(
                                 rows.getObject("receiver_id", UUID.class),
                                 rows.getString("receiver_username"),
+                                null,
                                 rows.getString("receiver_email"),
                                 rows.getObject("receiver_created_at", OffsetDateTime.class)
                         )

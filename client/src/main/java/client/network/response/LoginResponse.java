@@ -5,15 +5,15 @@ import client.dto.UserDTO;
 
 import java.util.UUID;
 
-public class RegistrationResponse extends Response{
+public class LoginResponse extends Response{
     private UserDTO user;
     private String accessToken;
     private String refreshToken;
 
-    public RegistrationResponse(){
+    public LoginResponse(){
         super();
     }
-    public RegistrationResponse(UUID requestId, String status, UserDTO user, String accessToken, String refreshToken)
+    public LoginResponse(UUID requestId, String status, UserDTO user, String accessToken, String refreshToken)
     {
         super(requestId, "Registration", status);
         this.user = user;
@@ -32,7 +32,6 @@ public class RegistrationResponse extends Response{
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
-
 
     public UserDTO getUser() {
         return user;

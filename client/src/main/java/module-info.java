@@ -3,6 +3,7 @@ module client {
     requires javafx.fxml;
 
     requires org.kordamp.ikonli.javafx;
+    requires javatuples;
     requires org.json;
     requires java.desktop;
     requires com.fasterxml.jackson.databind;

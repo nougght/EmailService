@@ -1,21 +1,22 @@
-package client.network.response;
+package server.network.response;
 
 
-import client.dto.UserDTO;
+import server.dto.UserDTO;
+import server.model.User;
 
 import java.util.UUID;
 
-public class RegistrationResponse extends Response{
+public class LoginResponse extends Response{
     private UserDTO user;
     private String accessToken;
     private String refreshToken;
 
-    public RegistrationResponse(){
+    public LoginResponse(){
         super();
     }
-    public RegistrationResponse(UUID requestId, String status, UserDTO user, String accessToken, String refreshToken)
+    public LoginResponse(UUID requestId, String status, UserDTO user, String accessToken, String refreshToken)
     {
-        super(requestId, "Registration", status);
+        super(requestId, "Login", status);
         this.user = user;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
@@ -32,7 +33,6 @@ public class RegistrationResponse extends Response{
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
-
 
     public UserDTO getUser() {
         return user;

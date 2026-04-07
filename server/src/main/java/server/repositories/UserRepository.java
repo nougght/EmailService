@@ -9,9 +9,52 @@ import java.util.UUID;
 import server.database.DatabaseManager;
 import server.model.User;
 
+import javax.xml.crypto.Data;
+
 public class UserRepository {
-    public Optional<User> getUserById(UUID userId)
+
+    public boolean checkUserExisting(String username)
     {
+        var con = DatabaseManager.getConnection();
+        try {
+            PreparedStatement st = con.prepareStatement("SELECT * FROM users WHERE users.username = ?");
+            st.setString(1, username);
+
+            var rows = st.executeQuery();
+            if (rows.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.println("SQLException " + e.toString());
+        }
+        return false;
+    }
+
+
+    public Optional<User> getUserByUsername(String username) {
+        var con = DatabaseManager.getConnection();
+        try {
+            PreparedStatement st = con.prepareStatement("SELECT * FROM users WHERE users.username = ?");
+            st.setString(1, username);
+
+            var rows = st.executeQuery();
+            if (rows.next()) {
+                User result = new User(
+                        UUID.fromString(rows.getString("user_id")),
+                        rows.getString("username"),
+                        rows.getString("password_hash"),
+                        rows.getString("email"),
+                        rows.getObject("created_at", OffsetDateTime.class)
+                );
+                return Optional.of(result);
+            }
+        } catch (SQLException e) {
+            System.out.println("SQLException " + e.toString());
+        }
+        return Optional.empty();
+    }
+
+    public Optional<User> getUserById(UUID userId) {
         var con = DatabaseManager.getConnection();
         try {
             PreparedStatement st = con.prepareStatement("SELECT * FROM users" +
@@ -25,36 +68,34 @@ public class UserRepository {
                 User result = new User(
                         UUID.fromString(rows.getString("user_id")),
                         rows.getString("username"),
+                        rows.getString("password_hash"),
                         rows.getString("email"),
                         rows.getObject("created_at", OffsetDateTime.class)
                 );
                 return Optional.of(result);
             }
-        } catch(SQLException e)
-        {
+        } catch (SQLException e) {
             System.out.println("SQLException " + e.toString());
         }
         return Optional.empty();
     }
 
-    public void addUser(User user)
-    {
+    public void addUser(User user) {
         var con = DatabaseManager.getConnection();
         try {
-            PreparedStatement st = con.prepareStatement("INSERT INTO users (user_id, username, email) " +
-                "VALUES (?, ?, ?)"
+            PreparedStatement st = con.prepareStatement("INSERT INTO users (username, password_hash, email) " +
+                    "VALUES (?, ?, ?)"
             );
 
-            st.setObject(1, user.getUserId());
-            st.setObject(2, user.getUsername());
+            st.setObject(1, user.getUsername());
+            st.setObject(2, user.getPasswordHash());
             st.setObject(3, user.getEmail());
 
             st.executeUpdate();
 
-        } catch(SQLException e)
-        {
+        } catch (SQLException e) {
             System.out.println("SQLException " + e.toString());
         }
     }
-    
+
 }

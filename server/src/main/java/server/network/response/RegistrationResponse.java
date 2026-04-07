@@ -1,7 +1,7 @@
-package client.network.response;
+package server.network.response;
 
-
-import client.dto.UserDTO;
+import server.dto.UserDTO;
+import server.model.User;
 
 import java.util.UUID;
 
@@ -46,3 +46,4 @@ public class RegistrationResponse extends Response{
         return refreshToken;
     }
 }
+

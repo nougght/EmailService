@@ -1,5 +1,7 @@
 package client.view;
 
+import client.viewModel.RegistrationViewModel;
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -10,6 +12,15 @@ import javafx.scene.control.TextField;
 
 public class RegistrationController {
 
+    private RegistrationViewModel viewModel;
+
+    public void setViewModel(RegistrationViewModel viewModel) {
+        this.viewModel = viewModel;
+
+        usernameInput.textProperty().bindBidirectional(viewModel.getUsername());
+        passwordInput.textProperty().bindBidirectional(viewModel.getPassword());
+
+    }
 
     @FXML
     private Label registrationLabel;
@@ -30,13 +41,11 @@ public class RegistrationController {
     private Button toLoginButton;
 
 
-    public void handleRegistrationClick(ActionEvent actionEvent)
-    {
-
+    public void handleRegistrationClick(ActionEvent actionEvent) {
+        viewModel.onRegisterClicked();
     }
 
-    public void handleToLoginClick(ActionEvent actionEvent)
-    {
-        
+    public void handleToLoginClick(ActionEvent actionEvent) {
+        viewModel.onToLoginClicked();
     }
 }

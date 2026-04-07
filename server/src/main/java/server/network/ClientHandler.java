@@ -7,10 +7,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.json.JSONObject;
 import server.mapper.EmailMapper;
 import server.mapper.UserMapper;
+import server.model.User;
 import server.network.request.GetEmailsRequest;
 import server.network.request.GetUserRequest;
+import server.network.request.LoginRequest;
+import server.network.request.RegistrationRequest;
 import server.network.response.GetEmailsResponse;
 import server.network.response.GetUserResponse;
+import server.network.response.LoginResponse;
+import server.network.response.RegistrationResponse;
+import server.services.AuthService;
 import server.services.EmailService;
 import server.services.UserService;
 
@@ -18,6 +24,7 @@ import server.services.UserService;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -26,12 +33,14 @@ public class ClientHandler implements Runnable {
     Socket socket;
     private BufferedReader sIn = null;
     private PrintWriter sOut = null;
+    final private AuthService authService;
     final private EmailService emailService;
     final private UserService userService;
     final private ObjectMapper jsonMapper = new ObjectMapper();
 
-    ClientHandler(Socket socket, EmailService emailService, UserService userService) {
+    ClientHandler(Socket socket, AuthService authService, EmailService emailService, UserService userService) {
         this.socket = socket;
+        this.authService = authService;
         this.emailService = emailService;
         this.userService = userService;
         jsonMapper.registerModule(new JavaTimeModule());
@@ -66,10 +75,16 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void handleRequest(String jsonRequest, String type)
-    {
-        try{
+    public void handleRequest(String jsonRequest, String type) {
+        try {
             switch (type) {
+                case "Registration":
+                    registrationHandler(jsonMapper.readValue(jsonRequest, RegistrationRequest.class));
+                    break;
+
+                case "Login":
+                    loginHandler(jsonMapper.readValue(jsonRequest, LoginRequest.class));
+                    break;
                 case "GetEmails":
                     getEmailsHandler(jsonMapper.readValue(jsonRequest, GetEmailsRequest.class));
                     break;
@@ -78,10 +93,11 @@ public class ClientHandler implements Runnable {
                     break;
             }
         } catch (Exception e) {
-            System.out.println(e.toString());
+            System.out.println("ClientHandler" + socket.getInetAddress() + " " + e.toString());
         }
 
     }
+
     public void getEmailsHandler(GetEmailsRequest request) {
         System.out.println("getEmails Handler");
         var emails = emailService.getUserEmails(request.getUserId());
@@ -117,7 +133,7 @@ public class ClientHandler implements Runnable {
         try {
             var json = jsonMapper.writeValueAsString(
                     existing.isPresent() ? new GetUserResponse(request.getRequestId(), "success", UserMapper.toDTO(existing.get())) :
-                            new GetUserResponse(request.getRequestId(),"not found", null)
+                            new GetUserResponse(request.getRequestId(), "not found", null)
             );
             sOut.println(json);
             System.out.println("response sent");
@@ -125,5 +141,52 @@ public class ClientHandler implements Runnable {
             System.out.println("json mapper exception " + e.toString());
         }
 
+    }
+
+
+    public void registrationHandler(RegistrationRequest request) {
+        var result = authService.register(request.getUsername(), request.getPassword());
+        User user = result.getValue0();
+        String status = result.getValue1();
+
+        if (Objects.equals(status, "success")) {
+            // to do добавить генерацию токенов
+        }
+
+        try {
+            var json = jsonMapper.writeValueAsString(new RegistrationResponse(
+                    request.getRequestId(),
+                    status,
+                    UserMapper.toDTO(user),
+                    "",
+                    ""
+            ));
+            sOut.println(json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void loginHandler(LoginRequest request) {
+        var result = authService.login(request.getUsername(), request.getPassword());
+        User user = result.getValue0();
+        String status = result.getValue1();
+
+        if (Objects.equals(status, "success")) {
+            // to do добавить генерацию токенов
+        }
+
+        try {
+            var json = jsonMapper.writeValueAsString(new LoginResponse(
+                    request.getRequestId(),
+                    status,
+                    UserMapper.toDTO(user),
+                    "",
+                    ""
+            ));
+            sOut.println(json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

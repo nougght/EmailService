@@ -7,7 +7,7 @@ import server.model.User;
 public class UserMapper {
     public static UserDTO toDTO(User user)
     {
-        return new UserDTO(
+        return user == null ? null : new UserDTO(
                 user.getUserId(),
                 user.getUsername(),
                 user.getEmail(),
@@ -16,9 +16,10 @@ public class UserMapper {
     }
     public static User fromDTO(UserDTO dto)
     {
-        return new User(
+        return dto != null ? null : new User(
                 dto.getUserId(),
                 dto.getUsername(),
+                null,
                 dto.getEmail(),
                 dto.getCreatedAt()
         );

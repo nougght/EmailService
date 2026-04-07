@@ -1,5 +1,6 @@
 package server.network;
 
+import server.services.AuthService;
 import server.services.EmailService;
 import server.services.UserService;
 
@@ -19,10 +20,12 @@ public class TcpServer {
     //    private Socket sock = null;
     private DataInputStream in = null;
 
+    final private AuthService authService;
     final private EmailService emailService;
     final private UserService userService;
 
-    public TcpServer(int port, EmailService emailService, UserService userService) {
+    public TcpServer(int port, AuthService authService, EmailService emailService, UserService userService) {
+        this.authService = authService;
         this.emailService = emailService;
         this.userService = userService;
 
@@ -51,7 +54,7 @@ public class TcpServer {
                 var socket = ssock.accept();
                 System.out.print("New Connection: ");
                 System.out.println(socket.getInetAddress());
-                new Thread(new ClientHandler(socket, emailService, userService)).start();
+                new Thread(new ClientHandler(socket, authService, emailService, userService)).start();
 
             }
 

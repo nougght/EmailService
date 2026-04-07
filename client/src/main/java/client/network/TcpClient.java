@@ -2,21 +2,15 @@ package client.network;
 
 import client.dto.EmailDTO;
 import client.dto.UserDTO;
-import client.model.Email;
-import client.network.request.GetEmailsRequest;
-import client.network.request.GetUserRequest;
-import client.network.request.Request;
-import client.network.response.GetEmailsResponse;
-import client.network.response.GetUserResponse;
-import client.network.response.Response;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import client.model.AuthResult;
+import client.network.request.*;
+import client.network.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import javax.net.ssl.*;
 import java.io.*;
-import java.net.Socket;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -40,7 +34,6 @@ public class TcpClient extends Thread {
 
     final private BlockingQueue requests = new LinkedBlockingQueue<String>();
     final private ConcurrentHashMap<UUID, CompletableFuture<Response>> pendingResponses = new ConcurrentHashMap<>();
-
 
     public TcpClient(String host, int port) {
         sHost = host;
@@ -85,7 +78,7 @@ public class TcpClient extends Thread {
             while (true) {
                 // ожидание нового запроса из очереди
                 var request = requests.take();
-                System.out.println("sent new request");
+                System.out.println("sent new request " + request);
                 // отправка запроса на сервер
                 sOut.println(request);
 
@@ -95,6 +88,39 @@ public class TcpClient extends Thread {
         }
     }
 
+
+
+    public CompletableFuture<AuthResult> requestRegistration(String username, String password){
+        try {
+            var request = new RegistrationRequest(username, password);
+            String jsonRequest = jsonMapper.writeValueAsString(request);
+            CompletableFuture<Response> future = new CompletableFuture<>();
+            pendingResponses.put(request.getRequestId(), future);
+            requests.put(jsonRequest);
+            return future.thenApply(resp -> {
+                var response = (RegistrationResponse) resp;
+                return new AuthResult(response.getStatus(),response.getUser(), response.getAccessToken(), response.getRefreshToken());
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public CompletableFuture<AuthResult> requestLogin(String username, String password){
+        try {
+            var request = new LoginRequest(username, password);
+            String jsonRequest = jsonMapper.writeValueAsString(request);
+            CompletableFuture<Response> future = new CompletableFuture<>();
+            pendingResponses.put(request.getRequestId(), future);
+            requests.put(jsonRequest);
+            return future.thenApply(resp -> {
+                var response = (LoginResponse) resp;
+                return new AuthResult(response.getStatus(),response.getUser(), response.getAccessToken(), response.getRefreshToken());
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public CompletableFuture<Optional<UserDTO>> requestUserByUserIdAsync(UUID userId) {
         try {
@@ -138,9 +164,8 @@ public class TcpClient extends Thread {
         }
     }
 
-    public CompletableFuture<ArrayList<EmailDTO>> requestAllUserEmails(UUID userId)
-    {
-        try{
+    public CompletableFuture<ArrayList<EmailDTO>> requestAllUserEmails(UUID userId) {
+        try {
             var request = new GetEmailsRequest(userId);
             String jsonRequest = jsonMapper.writeValueAsString(request);
             CompletableFuture<Response> future = new CompletableFuture<>();
@@ -149,7 +174,7 @@ public class TcpClient extends Thread {
             requests.put(jsonRequest);
             return future.thenApply(resp -> {
                 var response = (GetEmailsResponse) resp;
-                if (response.getStatus().equals("success")){
+                if (response.getStatus().equals("success")) {
                     return response.getEmails();
                 } else {
                     return new ArrayList<EmailDTO>();

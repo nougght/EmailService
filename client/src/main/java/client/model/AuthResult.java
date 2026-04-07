@@ -1,24 +1,23 @@
-package client.network.response;
-
+package client.model;
 
 import client.dto.UserDTO;
 
-import java.util.UUID;
-
-public class RegistrationResponse extends Response{
+public class AuthResult {
+    private String status;
     private UserDTO user;
     private String accessToken;
     private String refreshToken;
 
-    public RegistrationResponse(){
-        super();
-    }
-    public RegistrationResponse(UUID requestId, String status, UserDTO user, String accessToken, String refreshToken)
+    public AuthResult(String status, UserDTO user, String accessToken, String refreshToken)
     {
-        super(requestId, "Registration", status);
+        this.status = status;
         this.user = user;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public void setUser(UserDTO user) {
@@ -33,6 +32,9 @@ public class RegistrationResponse extends Response{
         this.refreshToken = refreshToken;
     }
 
+    public String getStatus() {
+        return status;
+    }
 
     public UserDTO getUser() {
         return user;

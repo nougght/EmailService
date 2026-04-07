@@ -19,7 +19,6 @@ import javafx.scene.text.Font;
 public class HelloController {
 
     private EmailViewModel viewModel;
-    static int count = 0;
 
     public void setViewModel(EmailViewModel viewModel) {
         this.viewModel = viewModel;

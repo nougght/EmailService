@@ -1,9 +1,7 @@
 package client.network;
 
 import client.dto.EmailDTO;
-import client.network.response.GetEmailsResponse;
-import client.network.response.GetUserResponse;
-import client.network.response.Response;
+import client.network.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -79,6 +77,12 @@ public class TcpListener extends Thread{
         Response response = null;
         try {
             switch (type) {
+                case "Registration":
+                    response = jsonMapper.readValue(jsonResponse, RegistrationResponse.class);
+                    break;
+                case "Login":
+                    response = jsonMapper.readValue(jsonResponse, LoginResponse.class);
+                    break;
                 case "GetUser":
                     response = jsonMapper.readValue(jsonResponse, GetUserResponse.class);
                     break;
