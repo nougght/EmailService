@@ -1,7 +1,7 @@
 package client.view;
 
 import client.model.Email;
-import client.viewModel.EmailViewModel;
+import client.viewModel.MainViewModel;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,11 +16,11 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
-public class HelloController {
+public class MainController {
 
-    private EmailViewModel viewModel;
+    private MainViewModel viewModel;
 
-    public void setViewModel(EmailViewModel viewModel) {
+    public void setViewModel(MainViewModel viewModel) {
         this.viewModel = viewModel;
         userLabel.textProperty().bind(Bindings.selectString(viewModel.getCurrentUser(), "username"));
         emailsList.setItems(viewModel.getEmails());

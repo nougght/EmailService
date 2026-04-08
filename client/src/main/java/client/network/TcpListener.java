@@ -89,6 +89,9 @@ public class TcpListener extends Thread{
                 case "GetEmails":
                     response = jsonMapper.readValue(jsonResponse, GetEmailsResponse.class);
                     break;
+                case "SendEmail":
+//                    response = jsonMapper.readValue(jsonResponse, )
+                    break;
             }
         }
         catch(Exception e)

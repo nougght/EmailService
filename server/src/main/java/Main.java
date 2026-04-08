@@ -6,6 +6,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import server.database.DatabaseManager;
 import server.repositories.EmailRepository;
 //import server.network.TestServer;
+import server.repositories.TokenRepository;
 import server.repositories.UserRepository;
 import server.services.AuthService;
 import server.services.EmailService;
@@ -24,7 +25,8 @@ public class Main {
         final DatabaseManager dm = new DatabaseManager(dotenv.get("DB_URL"), dotenv.get("DB_USER"), dotenv.get("DB_PASSWORD"));
         EmailRepository emailRepo = new EmailRepository();
         UserRepository userRepo = new UserRepository();
-        AuthService authService = new AuthService(userRepo);
+        TokenRepository tokenRepo = new TokenRepository();
+        AuthService authService = new AuthService(userRepo, tokenRepo, dotenv.get("JWT_SECRET_KEY"));
         EmailService emailService = new EmailService(emailRepo);
         UserService userService = new UserService(userRepo);
 

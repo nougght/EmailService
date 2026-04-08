@@ -77,6 +77,7 @@ public class ClientHandler implements Runnable {
 
     public void handleRequest(String jsonRequest, String type) {
         try {
+
             switch (type) {
                 case "Registration":
                     registrationHandler(jsonMapper.readValue(jsonRequest, RegistrationRequest.class));
@@ -100,6 +101,10 @@ public class ClientHandler implements Runnable {
 
     public void getEmailsHandler(GetEmailsRequest request) {
         System.out.println("getEmails Handler");
+//        проверка токена доступа
+        UUID userId = authService.verifyAccessToken(request.getAccessToken());
+        if (userId == null)
+            return;
         var emails = emailService.getUserEmails(request.getUserId());
 
 //            var data = new JSONArray();
@@ -128,6 +133,11 @@ public class ClientHandler implements Runnable {
     }
 
     public void getUserHandler(GetUserRequest request) {
+//        проверка токена доступа
+        UUID userId = authService.verifyAccessToken(request.getAccessToken());
+        if (userId == null)
+            return;
+
         var existing = userService.getUserByUserId(request.getUserId());
 
         try {
@@ -149,18 +159,23 @@ public class ClientHandler implements Runnable {
         User user = result.getValue0();
         String status = result.getValue1();
 
-        if (Objects.equals(status, "success")) {
-            // to do добавить генерацию токенов
-        }
-
         try {
-            var json = jsonMapper.writeValueAsString(new RegistrationResponse(
+
+            var response = new RegistrationResponse(
                     request.getRequestId(),
                     status,
                     UserMapper.toDTO(user),
                     "",
                     ""
-            ));
+            );
+
+            if (Objects.equals(status, "success")) {
+                String refreshToken = UUID.randomUUID().toString();
+                authService.addRefreshToken(UUID.randomUUID().toString(), user.getUserId());
+                response.setAccessToken(authService.genAccessToken(user.getUserId()));
+                response.setRefreshToken(refreshToken);
+            }
+            var json = jsonMapper.writeValueAsString(response);
             sOut.println(json);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -172,18 +187,21 @@ public class ClientHandler implements Runnable {
         User user = result.getValue0();
         String status = result.getValue1();
 
-        if (Objects.equals(status, "success")) {
-            // to do добавить генерацию токенов
-        }
-
         try {
-            var json = jsonMapper.writeValueAsString(new LoginResponse(
+            var response = new LoginResponse(
                     request.getRequestId(),
                     status,
                     UserMapper.toDTO(user),
                     "",
                     ""
-            ));
+            );
+            if (Objects.equals(status, "success")) {
+                String refreshToken = UUID.randomUUID().toString();
+                authService.addRefreshToken(UUID.randomUUID().toString(), user.getUserId());
+                response.setAccessToken(authService.genAccessToken(user.getUserId()));
+                response.setRefreshToken(refreshToken);
+            }
+            var json = jsonMapper.writeValueAsString(response);
             sOut.println(json);
         } catch (Exception e) {
             throw new RuntimeException(e);

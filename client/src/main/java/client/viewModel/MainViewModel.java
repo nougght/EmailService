@@ -5,13 +5,12 @@ import client.model.User;
 import client.service.EmailService;
 import client.service.SessionService;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 
-public class EmailViewModel {
+public class MainViewModel {
     final private EmailService emailService;
     final private SessionService sessionService;
-    public EmailViewModel(EmailService emailService, SessionService sessionService)
+    public MainViewModel(EmailService emailService, SessionService sessionService)
     {
         this.emailService = emailService;
         this.sessionService = sessionService;

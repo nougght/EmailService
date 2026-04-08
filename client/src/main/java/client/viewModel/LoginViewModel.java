@@ -41,8 +41,8 @@ public class LoginViewModel {
         return onToRegistration;
     }
 
-    public Object getOnLoggedIn() {
-        return onLoggedIn.get();
+    public ObjectProperty<Object> getOnLoggedIn() {
+        return onLoggedIn;
     }
 
     public void onLoginClicked() {
@@ -50,7 +50,7 @@ public class LoginViewModel {
             Platform.runLater(() -> {
                 switch (s) {
                     case "success":
-                        onLoggedIn.set(null);
+                        onLoggedIn.set(new Object());
                         break;
                     case "not found":
                         warning.set("Пользователь не найден");
@@ -63,6 +63,6 @@ public class LoginViewModel {
     }
 
     public void onToRegistrationClicked() {
-        onToRegistration.set(null);
+        onToRegistration.set(new Object());
     }
 }

@@ -27,6 +27,7 @@ public class SessionService {
         this.currentUser.set(currentUser);
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+        // to do: сохранение refresh token на клиенте
         sessionSetListeners.forEach(c -> c.accept(""));
     }
 

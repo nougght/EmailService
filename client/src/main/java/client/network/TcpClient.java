@@ -30,6 +30,9 @@ public class TcpClient extends Thread {
     private SSLSocket socket;
     private BufferedReader sIn = null;
     private PrintWriter sOut = null;
+
+    private String accessToken;
+
     final private ObjectMapper jsonMapper = new ObjectMapper();
 
     final private BlockingQueue requests = new LinkedBlockingQueue<String>();
@@ -41,6 +44,10 @@ public class TcpClient extends Thread {
         jsonMapper.registerModule(new JavaTimeModule());
         jsonMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     @Override
@@ -109,6 +116,7 @@ public class TcpClient extends Thread {
     public CompletableFuture<AuthResult> requestLogin(String username, String password){
         try {
             var request = new LoginRequest(username, password);
+
             String jsonRequest = jsonMapper.writeValueAsString(request);
             CompletableFuture<Response> future = new CompletableFuture<>();
             pendingResponses.put(request.getRequestId(), future);
@@ -128,6 +136,9 @@ public class TcpClient extends Thread {
             var request = new GetUserRequest(
                     userId
             );
+
+            request.setAccessToken(accessToken);
+
             String jsonRequest = jsonMapper.writeValueAsString(request);
             CompletableFuture<Response> future = new CompletableFuture<>();
             // добавляем в таблицу ожидаемых ответов
@@ -167,6 +178,9 @@ public class TcpClient extends Thread {
     public CompletableFuture<ArrayList<EmailDTO>> requestAllUserEmails(UUID userId) {
         try {
             var request = new GetEmailsRequest(userId);
+
+            request.setAccessToken(accessToken);
+
             String jsonRequest = jsonMapper.writeValueAsString(request);
             CompletableFuture<Response> future = new CompletableFuture<>();
 

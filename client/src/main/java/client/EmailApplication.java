@@ -3,6 +3,9 @@ package client;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
+
+import client.view.MainController;
+import client.viewModel.MainViewModel;
 import org.javatuples.Pair;
 
 import client.network.TcpClient;
@@ -59,6 +62,9 @@ public class EmailApplication extends Application {
                 vm.getOnToRegistration().addListener((obj) -> {
                     goToRegistrationPage(mainPane);
                 });
+                vm.getOnLoggedIn().addListener((obj) -> {
+                    goToMainPage(mainPane);
+                });
                 controller.setViewModel(vm);
             }
             root.getChildren().clear();
@@ -79,6 +85,9 @@ public class EmailApplication extends Application {
                 vm.getOnToLogin().addListener((obj) -> {
                     goToLoginPage(mainPane);
                 });
+                vm.getOnRegistered().addListener((obj) -> {
+                    goToMainPage(mainPane);
+                });
                 controller.setViewModel(vm);
             }
             root.getChildren().clear();
@@ -88,10 +97,27 @@ public class EmailApplication extends Application {
         }
     }
 
+    public void goToMainPage(StackPane root){
+        try {
+            var pair = getPageWithController("main-view");
+            Parent view = pair.getValue0();
+            MainController controller = (MainController) pair.getValue1();
+            if (controller != null)
+            {
+                var vm = new MainViewModel(emailService, sessionService);
+                controller.setViewModel(vm);
+            }
+            root.getChildren().clear();
+            root.getChildren().add(view);
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
 
-        SessionService sessionService = new SessionService(tcpClient);
+        sessionService = new SessionService(tcpClient);
 
         authService = new AuthService(tcpClient, sessionService, dataStorage);
         emailService = new EmailService(

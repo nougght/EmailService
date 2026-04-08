@@ -23,6 +23,8 @@ public class AuthService {
             if (res.getStatus().equals("success")){
                 sessionService.setSession(
                         UserMapper.fromDTO(res.getUser()), res.getAccessToken(), res.getRefreshToken());
+                tcpClient.setAccessToken(res.getAccessToken());
+
             }
             return res.getStatus();
         });
@@ -31,8 +33,10 @@ public class AuthService {
     public CompletableFuture<String> login(String username, String password) {
         return tcpClient.requestLogin(username, password).thenApply(res -> {
             if (res.getStatus().equals("success")){
+                tcpClient.setAccessToken(res.getAccessToken());
                 sessionService.setSession(
                         UserMapper.fromDTO(res.getUser()), res.getAccessToken(), res.getRefreshToken());
+
             }
             return res.getStatus();
         });
