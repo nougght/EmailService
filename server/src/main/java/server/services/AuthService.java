@@ -107,15 +107,24 @@ public class AuthService {
     }
 
     public boolean checkRefreshToken(String token, UUID userId) {
-        var latestToken = tokenRepository.getRefreshToken(userId);
-        // токен должен совпадать с сохраненным и не истекшим
-        return !(latestToken.isEmpty() || !sha256(token).equals(latestToken.get().getTokenHash())
-                || latestToken.get().getExpiresAt().isAfter(OffsetDateTime.now()));
+        try {
+            var latestToken = tokenRepository.getRefreshToken(userId);
+            // токен должен совпадать с сохраненным и не истекшим
+            var hash = sha256(token);
+            System.out.println("incoming token: " + token);
+            System.out.println("incoming hash:  " + hash);
+            System.out.println("stored hash:    " + latestToken.get().getTokenHash());
+            return !(latestToken.isEmpty() || !hash.equals(latestToken.get().getTokenHash())
+                    || latestToken.get().getExpiresAt().isBefore(OffsetDateTime.now()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
     public void addRefreshToken(String rawToken, UUID userId) {
         try {
+            System.out.println("raw token hashed " + rawToken);
             Token token = new Token(
                     null,
                     userId,

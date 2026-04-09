@@ -18,6 +18,19 @@ public class AuthService {
     }
 
 
+    public CompletableFuture<String> tryAutoAuth(){
+        sessionService.LoadRefreshTokenAndUserId();
+        if (sessionService.getRefreshToken() == null || sessionService.getSavedUserId() == null)
+            return CompletableFuture.completedFuture("failure");
+        return tcpClient.requestAutoAuth(sessionService.getRefreshToken(), sessionService.getSavedUserId()).thenApply(res -> {
+            if (res.getStatus().equals("success")) {
+                sessionService.setSession(
+                        UserMapper.fromDTO(res.getUser()), res.getAccessToken(), res.getRefreshToken());
+                tcpClient.setAccessToken(res.getAccessToken());
+            }
+            return res.getStatus();
+        });
+    }
     public CompletableFuture<String> register(String username, String password) {
         return tcpClient.requestRegistration(username, password).thenApply(res -> {
             if (res.getStatus().equals("success")){

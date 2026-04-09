@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import client.view.MainController;
 import client.viewModel.MainViewModel;
+import javafx.application.Platform;
 import org.javatuples.Pair;
 
 import client.network.TcpClient;
@@ -140,11 +141,23 @@ public class EmailApplication extends Application {
 //        HelloController controller = fxmlLoader.getController();
 //        controller.setViewModel(new EmailViewModel(emailService, sessionService));
 
+
         mainPane = new StackPane();
         Scene scene = new Scene(mainPane, 1000, 700);
         stage.setTitle("Hello!");
         stage.setScene(scene);
-        goToRegistrationPage(mainPane);
+        authService.tryAutoAuth().thenAccept(s -> {
+            if (s.equals("success")){
+                System.out.println("Successful auto auth");
+                Platform.runLater(() -> goToMainPage(mainPane));
+
+            }
+            else {
+                System.out.println("Auto auth failed: " + s);
+                Platform.runLater(() -> goToRegistrationPage(mainPane));
+            }
+        });
+//        goToRegistrationPage(mainPane);
 
 
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {

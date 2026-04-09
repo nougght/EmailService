@@ -42,7 +42,12 @@ public class TokenRepository {
         try {
             var con = DatabaseManager.getConnection();
 
-            var st = con.prepareStatement(
+            var st = con.prepareStatement("DELETE FROM tokens WHERE user_id = ?");
+            st.setObject(1, token.getUserId());
+            st.executeUpdate();
+
+
+            st = con.prepareStatement(
                     "INSERT INTO tokens(user_id, token_hash, expires_at) VALUES (?, ?, ?)"
             );
             st.setObject(1, token.getUserId());

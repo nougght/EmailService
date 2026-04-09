@@ -199,6 +199,26 @@ public class TcpClient extends Thread {
             throw new RuntimeException(e.toString());
         }
     }
+
+    public CompletableFuture<AuthResult> requestAutoAuth(String refreshToken, UUID userId) {
+        try {
+            var request = new RefreshRequest(userId, refreshToken);
+
+            String jsonRequest = jsonMapper.writeValueAsString(request);
+
+            CompletableFuture<Response> future = new CompletableFuture<>();
+
+            pendingResponses.put(request.getRequestId(), future);
+            requests.put(jsonRequest);
+            return future.thenApply(resp -> {
+                var response = (RefreshResponse) resp;
+                return new AuthResult(response.getStatus(), response.getUser(), response.getAccessToken(), null);
+            });
+        }
+        catch(Exception e){
+            throw new RuntimeException(e);
+        }
+    }
 }
 
 //    public ArrayList<EmailDTO> requestEmails()

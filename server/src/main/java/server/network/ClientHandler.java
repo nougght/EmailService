@@ -8,14 +8,8 @@ import org.json.JSONObject;
 import server.mapper.EmailMapper;
 import server.mapper.UserMapper;
 import server.model.User;
-import server.network.request.GetEmailsRequest;
-import server.network.request.GetUserRequest;
-import server.network.request.LoginRequest;
-import server.network.request.RegistrationRequest;
-import server.network.response.GetEmailsResponse;
-import server.network.response.GetUserResponse;
-import server.network.response.LoginResponse;
-import server.network.response.RegistrationResponse;
+import server.network.request.*;
+import server.network.response.*;
 import server.services.AuthService;
 import server.services.EmailService;
 import server.services.UserService;
@@ -82,9 +76,11 @@ public class ClientHandler implements Runnable {
                 case "Registration":
                     registrationHandler(jsonMapper.readValue(jsonRequest, RegistrationRequest.class));
                     break;
-
                 case "Login":
                     loginHandler(jsonMapper.readValue(jsonRequest, LoginRequest.class));
+                    break;
+                case "Refresh":
+                    refreshHandler(jsonMapper.readValue(jsonRequest, RefreshRequest.class));
                     break;
                 case "GetEmails":
                     getEmailsHandler(jsonMapper.readValue(jsonRequest, GetEmailsRequest.class));
@@ -197,10 +193,38 @@ public class ClientHandler implements Runnable {
             );
             if (Objects.equals(status, "success")) {
                 String refreshToken = UUID.randomUUID().toString();
-                authService.addRefreshToken(UUID.randomUUID().toString(), user.getUserId());
+                authService.addRefreshToken(refreshToken, user.getUserId());
                 response.setAccessToken(authService.genAccessToken(user.getUserId()));
                 response.setRefreshToken(refreshToken);
             }
+            var json = jsonMapper.writeValueAsString(response);
+            sOut.println(json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void refreshHandler(RefreshRequest request) {
+        var isValid = authService.checkRefreshToken(request.getRefreshToken(), request.getUserId());
+        var optionalUser = userService.getUserByUserId(request.getUserId());
+        var status = "";
+        User user = null;
+        String accessToken = null;
+        if (!isValid) {
+            status = "invalid refresh token";
+        } else if (optionalUser.isEmpty()){
+            status="not found";
+        } else {
+            user = optionalUser.get();
+            status="success";
+            accessToken = authService.genAccessToken(request.getUserId());
+        }
+        try {
+            var response = new RefreshResponse(request.getRequestId(),
+                    status,
+                    UserMapper.toDTO(user),
+                    accessToken
+            );
             var json = jsonMapper.writeValueAsString(response);
             sOut.println(json);
         } catch (Exception e) {
