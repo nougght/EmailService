@@ -57,8 +57,7 @@ public class EmailApplication extends Application {
             var pair = getPageWithController("login-view");
             Parent view = pair.getValue0();
             LoginController controller = (LoginController) pair.getValue1();
-            if (controller != null)
-            {
+            if (controller != null) {
                 var vm = new LoginViewModel(authService, sessionService);
                 vm.getOnToRegistration().addListener((obj) -> {
                     goToRegistrationPage(mainPane);
@@ -80,8 +79,7 @@ public class EmailApplication extends Application {
             var pair = getPageWithController("registration-view");
             Parent view = pair.getValue0();
             RegistrationController controller = (RegistrationController) pair.getValue1();
-            if (controller != null)
-            {
+            if (controller != null) {
                 var vm = new RegistrationViewModel(this.authService, sessionService);
                 vm.getOnToLogin().addListener((obj) -> {
                     goToLoginPage(mainPane);
@@ -98,19 +96,23 @@ public class EmailApplication extends Application {
         }
     }
 
-    public void goToMainPage(StackPane root){
+    public void goToMainPage(StackPane root) {
         try {
             var pair = getPageWithController("main-view");
             Parent view = pair.getValue0();
             MainController controller = (MainController) pair.getValue1();
-            if (controller != null)
-            {
-                var vm = new MainViewModel(emailService, sessionService);
+            if (controller != null) {
+                var vm = new MainViewModel(authService, emailService, sessionService);
+                vm.getOnLogout().addListener(obj -> {
+                    Platform.runLater(() -> {
+                        goToLoginPage(mainPane);
+                    });
+                });
                 controller.setViewModel(vm);
             }
             root.getChildren().clear();
             root.getChildren().add(view);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -130,11 +132,11 @@ public class EmailApplication extends Application {
         tcpClient.start();
         // temp
         System.out.println("start session");
-        emailService.getUserByUserId(UUID.fromString("94c33924-fe82-46b1-9d2b-84942a7da794")).
-                thenAccept(u -> {
-                    dataStorage.addUser(u.get());
-                    sessionService.setSession(u.get(), null, null);
-                });
+//        emailService.getUserByUserId(UUID.fromString("94c33924-fe82-46b1-9d2b-84942a7da794")).
+//                thenAccept(u -> {
+//                    dataStorage.addUser(u.get());
+//                    sessionService.setSession(u.get(), null, null);
+//                });
 
 //        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("main-view.fxml"));
 //        Parent root = fxmlLoader.load();
@@ -147,12 +149,11 @@ public class EmailApplication extends Application {
         stage.setTitle("Hello!");
         stage.setScene(scene);
         authService.tryAutoAuth().thenAccept(s -> {
-            if (s.equals("success")){
+            if (s.equals("success")) {
                 System.out.println("Successful auto auth");
                 Platform.runLater(() -> goToMainPage(mainPane));
 
-            }
-            else {
+            } else {
                 System.out.println("Auto auth failed: " + s);
                 Platform.runLater(() -> goToRegistrationPage(mainPane));
             }

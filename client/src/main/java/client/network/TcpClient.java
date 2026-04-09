@@ -130,6 +130,25 @@ public class TcpClient extends Thread {
         }
     }
 
+    public CompletableFuture<String> requestLogout(UUID userId){
+        try {
+            var request = new LogoutRequest();
+            request.setAccessToken(accessToken);
+
+            var jsonRequest = jsonMapper.writeValueAsString(request);
+            CompletableFuture<Response> future = new CompletableFuture<>();
+
+            pendingResponses.put(request.getRequestId(), future);
+            requests.add(jsonRequest);
+            return future.thenApply(resp -> {
+                var response = (LogoutResponse) resp;
+                return response.getStatus();
+            });
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
     public CompletableFuture<Optional<UserDTO>> requestUserByUserIdAsync(UUID userId) {
         try {
 

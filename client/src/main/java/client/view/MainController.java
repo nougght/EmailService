@@ -83,6 +83,8 @@ public class MainController {
 
     public void handleClick(ActionEvent actionEvent) {
         viewModel.onRefreshClicked();
-
+    }
+    public void handleLogoutClick(ActionEvent actionEvent){
+        viewModel.onLogoutClicked();
     }
 }

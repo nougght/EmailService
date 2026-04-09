@@ -59,4 +59,17 @@ public class TokenRepository {
             throw new RuntimeException(e);
         }
     }
+
+    public void deleteRefreshTokens(UUID userId)
+    {
+        var con = DatabaseManager.getConnection();
+        try {
+            var st = con.prepareStatement("DELETE FROM tokens WHERE tokens.user_id = ?");
+            st.setObject(1, userId);
+            st.executeUpdate();
+        } catch(Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
 }

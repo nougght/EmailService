@@ -86,6 +86,9 @@ public class TcpListener extends Thread{
                 case "Refresh":
                     response = jsonMapper.readValue(jsonResponse, RefreshResponse.class);
                     break;
+                case "Logout":
+                    response = jsonMapper.readValue(jsonResponse, LogoutResponse.class);
+                    break;
                 case "GetUser":
                     response = jsonMapper.readValue(jsonResponse, GetUserResponse.class);
                     break;

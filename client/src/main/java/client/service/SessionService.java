@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
+import javafx.application.Platform;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 
 import client.model.User;
@@ -25,14 +26,13 @@ public class SessionService {
     private ArrayList<Consumer<String>> sessionSetListeners = new ArrayList<>();
 
     public SessionService(TcpClient tcpClient) {
-        encryptor  = new StandardPBEStringEncryptor();
+        encryptor = new StandardPBEStringEncryptor();
         // to do: hide password
         encryptor.setPassword("49Kst0rE/701");
         encryptor.setAlgorithm("PBEWithMD5AndDES"); // Use default
     }
 
-    public void addListener(Consumer c)
-    {
+    public void addListener(Consumer c) {
         sessionSetListeners.add(c);
     }
 
@@ -56,8 +56,17 @@ public class SessionService {
         sessionSetListeners.forEach(c -> c.accept(""));
     }
 
-    public void LoadRefreshTokenAndUserId()
-    {
+    public void resetSession() {
+        Platform.runLater(() -> {
+                this.currentUser.set(null);
+                this.accessToken = null;
+                this.refreshToken = null;
+                this.savedUserId = null;
+            }
+        );
+    }
+
+    public void LoadRefreshTokenAndUserId() {
         Preferences prefs = Preferences.userNodeForPackage(Application.class);
         String encryptedRefreshToken = prefs.get("refresh_token", null);
         if (encryptedRefreshToken != null) {

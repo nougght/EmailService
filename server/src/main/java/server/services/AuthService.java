@@ -55,6 +55,7 @@ public class AuthService {
 
         var user = new User(null, username, encodePassword(password), null, null);
         userRepository.addUser(user);
+        user = userRepository.getUserByUsername(username).get();
         return new Pair<User, String>(user, "success");
     }
 
@@ -70,6 +71,11 @@ public class AuthService {
         }
         return new Pair<User, String>(null, "incorrect password");
 
+    }
+
+    public void logout(UUID userId)
+    {
+        tokenRepository.deleteRefreshTokens(userId);
     }
 
     public String genAccessToken(UUID userId) {
@@ -109,12 +115,14 @@ public class AuthService {
     public boolean checkRefreshToken(String token, UUID userId) {
         try {
             var latestToken = tokenRepository.getRefreshToken(userId);
+            if (latestToken.isEmpty())
+                return false;
             // токен должен совпадать с сохраненным и не истекшим
             var hash = sha256(token);
             System.out.println("incoming token: " + token);
             System.out.println("incoming hash:  " + hash);
             System.out.println("stored hash:    " + latestToken.get().getTokenHash());
-            return !(latestToken.isEmpty() || !hash.equals(latestToken.get().getTokenHash())
+            return !(!hash.equals(latestToken.get().getTokenHash())
                     || latestToken.get().getExpiresAt().isBefore(OffsetDateTime.now()));
         } catch (Exception e) {
             throw new RuntimeException(e);

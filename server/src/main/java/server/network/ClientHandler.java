@@ -82,6 +82,9 @@ public class ClientHandler implements Runnable {
                 case "Refresh":
                     refreshHandler(jsonMapper.readValue(jsonRequest, RefreshRequest.class));
                     break;
+                case "Logout":
+                    logoutHandler(jsonMapper.readValue(jsonRequest, LogoutRequest.class));
+                    break;
                 case "GetEmails":
                     getEmailsHandler(jsonMapper.readValue(jsonRequest, GetEmailsRequest.class));
                     break;
@@ -91,6 +94,24 @@ public class ClientHandler implements Runnable {
             }
         } catch (Exception e) {
             System.out.println("ClientHandler" + socket.getInetAddress() + " " + e.toString());
+        }
+
+    }
+
+    private void logoutHandler(LogoutRequest request) {
+        UUID userId = authService.verifyAccessToken(request.getAccessToken());
+        if (userId == null)
+            return;
+
+        authService.logout(userId);
+        try {
+            var json = jsonMapper.writeValueAsString(new LogoutResponse(
+                    request.getRequestId(),
+                    "success"
+            ));
+            sOut.println(json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
     }

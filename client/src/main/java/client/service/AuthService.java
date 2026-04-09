@@ -56,4 +56,16 @@ public class AuthService {
     }
 
 
+    public CompletableFuture<String> logout() {
+        return tcpClient.requestLogout(sessionService.getCurrentUser().get().getUserId()).thenApply(s -> {
+            if (s.equals("success")){
+                tcpClient.setAccessToken(null);
+                sessionService.resetSession();
+                System.out.println("Logged out");
+            }
+            return s;
+        });
+    }
+
+
 }
