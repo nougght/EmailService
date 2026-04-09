@@ -40,12 +40,14 @@ public class EmailRepository {
                         new User(
                                 rows.getObject("sender_id", UUID.class),
                                 rows.getString("sender_username"),
+                                null,
                                 rows.getString("sender_email"),
                                 rows.getObject("sender_created_at", OffsetDateTime.class)
                         ),
                         new User(
                                 rows.getObject("receiver_id", UUID.class),
                                 rows.getString("receiver_username"),
+                                null,
                                 rows.getString("receiver_email"),
                                 rows.getObject("receiver_created_at", OffsetDateTime.class)
                         )
@@ -56,6 +58,26 @@ public class EmailRepository {
         } catch (SQLException ex) {
             System.out.println(ex.toString());
             return new ArrayList<>();
+        }
+    }
+
+    public void addEmail(Email email) {
+        var con = DatabaseManager.getConnection();
+        try {
+            PreparedStatement st = con.prepareStatement("INSERT INTO emails (email_id, sender_id, receiver_id, subject, body, sent_at) " +
+                    "VALUES (?, ?, ?, ?, ?)");
+
+            st.setObject(1, email.getEmailId());
+            st.setObject(2, email.getSenderId());
+            st.setObject(3, email.getReceiverId());
+            st.setObject(4, email.getSubject());
+            st.setObject(5, email.getBody());
+
+            st.executeUpdate();
+
+
+        } catch (SQLException e) {
+            System.out.println("SQLException " + e.toString());
         }
     }
 }

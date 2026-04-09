@@ -3,12 +3,9 @@ package client.mapper;
 
 import client.dto.EmailDTO;
 import client.model.Email;
-import client.storage.DataStorage;
 
 public class EmailMapper {
-
-
-    public EmailDTO toDTO(Email email) {
+    public static EmailDTO toDTO(Email email) {
         return new EmailDTO(
                 email.getEmailId(),
                 email.getSenderId(),
@@ -19,7 +16,7 @@ public class EmailMapper {
         );
     }
 
-    public Email fromDTO(EmailDTO dto) {
+    public static Email fromDTO(EmailDTO dto) {
         return new Email(
                 dto.getEmailId(),
                 dto.getSenderId(),

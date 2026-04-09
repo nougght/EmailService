@@ -15,8 +15,15 @@ public class UserService {
 
     public Optional<User> getUserByUserId(UUID userId)
     {
+        if (userId == null)
+            return Optional.<User>empty();
         var existing = userRepo.getUserById(userId);
         return existing;
+    }
+
+    public void addUser(User user)
+    {
+        userRepo.addUser(user);
     }
 
 }

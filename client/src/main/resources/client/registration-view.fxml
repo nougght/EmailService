@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="554.0" prefWidth="582.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.view.RegistrationController">
+   <content>
+      <StackPane prefHeight="439.0" prefWidth="441.0">
+          <padding>
+              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+          </padding>
+         <children>
+            <VBox alignment="CENTER" maxHeight="275.0" maxWidth="300.0" spacing="20.0">
+                  
+                  <Label fx:id="registrationLabel" text="Регистрация" />
+                  <TextField fx:id="usernameInput" promptText="Имя пользователя" />
+                  <PasswordField fx:id="passwordInput" promptText="********" />
+                  <Label fx:id="warningLabel" />
+                  <Button fx:id="registrationButton" onAction="#handleRegistrationClick" text="Зарегистрироваться" textAlignment="CENTER" />
+               <AnchorPane>
+                  <children>
+                        <Button fx:id="toLoginButton" AnchorPane.rightAnchor="5.0" onAction="#handleToLoginClick" text="Уже есть аккаунт" textAlignment="CENTER" />
+                  </children>
+               </AnchorPane>
+            
+              </VBox>
+         </children>
+      </StackPane>
+   </content>
+</ScrollPane>
