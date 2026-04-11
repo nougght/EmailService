@@ -169,6 +169,8 @@ public class EmailApplication extends Application {
 
         mainPane = new StackPane();
         Scene scene = new Scene(mainPane, 1000, 700);
+        scene.getStylesheets().add(getClass().getResource("/client/styles/base.css").toExternalForm());
+
         stage.setTitle("Hello!");
         stage.setScene(scene);
         authService.tryAutoAuth().thenAccept(s -> {
