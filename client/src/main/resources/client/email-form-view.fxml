@@ -3,19 +3,24 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="EmailFormController">
-   <children>
-      <VBox AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0"
-      padding="">
-         <children>
-            <HBox prefHeight="100.0" prefWidth="200.0">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.view.EmailFormController">
+    <children>
+        <VBox AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+            <children>
+                <HBox prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <Label text="Кому:" />
+                        <TextField HBox.hgrow="ALWAYS" />
+                    </children>
+                </HBox>
+            <HBox>
                <children>
-                  <Label text="Кому:" />
-                  <TextField HBox.hgrow="ALWAYS"/>
+                  <Label text="Label" />
+                      <TextField alignment="CENTER" />
                </children>
             </HBox>
-            <TextField />
-            <TextArea VBox.vgrow="ALWAYS" prefHeight="200.0" prefWidth="200.0" />
-         </children></VBox>
-   </children>
+                <TextArea prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+            </children>
+        </VBox>
+    </children>
 </AnchorPane>

@@ -7,20 +7,20 @@
    <children>
       <AnchorPane prefHeight="200.0" prefWidth="200.0">
          <children>
-            <BorderPane prefHeight="260.0" prefWidth="291.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+            <BorderPane fx:id="borderPane" prefHeight="260.0" prefWidth="291.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
                <top>
                   <VBox BorderPane.alignment="CENTER">
                      <children>
                         <MenuBar>
                           <menus>
-                            <Menu mnemonicParsing="false"  text="Menu" />
+                            <Menu mnemonicParsing="false" text="Menu" />
                           </menus>
                         </MenuBar>
                         <ToolBar prefHeight="40.0" prefWidth="200.0">
                           <items>
                             <Button mnemonicParsing="false" text="Написать" />
                               <Button mnemonicParsing="false" text="Удалить" />
-                              <Button mnemonicParsing="false" text="Выйти из аккаунта" onAction="#handleLogoutClick"/>
+                              <Button mnemonicParsing="false" onAction="#handleLogoutClick" text="Выйти из аккаунта" />
                           </items>
                         </ToolBar>
                      </children>

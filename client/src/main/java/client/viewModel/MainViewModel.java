@@ -1,6 +1,5 @@
 package client.viewModel;
 
-import client.model.AuthResult;
 import client.model.Email;
 import client.model.User;
 import client.service.AuthService;
@@ -9,6 +8,8 @@ import client.service.SessionService;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+
+import java.util.UUID;
 
 public class MainViewModel {
     final private AuthService authService;
@@ -24,6 +25,7 @@ public class MainViewModel {
     }
 
     private ObjectProperty<Object> onLogout = new SimpleObjectProperty<>();
+    private ObjectProperty<UUID> onOpenEmail = new SimpleObjectProperty<>();
 
     private ObjectProperty<User> currentUser;
     private ObservableList<Email> emails;
@@ -36,6 +38,7 @@ public class MainViewModel {
     {
         return onLogout;
     }
+    public ObjectProperty<UUID> getOnOpenEmail() {return onOpenEmail;}
 
     public ObservableList<Email> getEmails() {
         return emails;
@@ -53,5 +56,9 @@ public class MainViewModel {
                 onLogout.set(new Object());
             }
         });
+    }
+
+    public void onEmailClicked(UUID emailId){
+        onOpenEmail.set(emailId);
     }
 }

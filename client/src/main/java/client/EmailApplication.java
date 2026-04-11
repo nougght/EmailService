@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
+import client.view.EmailController;
 import client.view.MainController;
+import client.viewModel.EmailViewModel;
 import client.viewModel.MainViewModel;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.layout.BorderPane;
 import org.javatuples.Pair;
 
 import client.network.TcpClient;
@@ -101,8 +105,27 @@ public class EmailApplication extends Application {
             var pair = getPageWithController("main-view");
             Parent view = pair.getValue0();
             MainController controller = (MainController) pair.getValue1();
+            BorderPane borderPane = controller.getBorderPane();
             if (controller != null) {
                 var vm = new MainViewModel(authService, emailService, sessionService);
+                vm.getOnOpenEmail().addListener( (ObservableValue<? extends UUID> obs, UUID old, UUID id) -> {
+                    try {
+                        var loader = new FXMLLoader(EmailApplication.class.getResource("email-view.fxml"));
+
+                        Parent emailView = loader.load();
+                        var contr = (EmailController)loader.getController();
+                        var optionalEmail = emailService.getEmailByEmailId(id);
+                        if (optionalEmail.isEmpty())
+                            return;
+                        EmailViewModel emailVM = new EmailViewModel(emailService, sessionService, optionalEmail.get());
+                        // to do: reply and forward buttons handling
+                        contr.setViewModel(emailVM);
+                        borderPane.setCenter(emailView);
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
                 vm.getOnLogout().addListener(obj -> {
                     Platform.runLater(() -> {
                         goToLoginPage(mainPane);

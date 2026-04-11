@@ -3,6 +3,7 @@ package client.network;
 import client.dto.EmailDTO;
 import client.dto.UserDTO;
 import client.model.AuthResult;
+import client.model.Email;
 import client.network.request.*;
 import client.network.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -219,6 +220,13 @@ public class TcpClient extends Thread {
         }
     }
 
+//    public CompletableFuture<Optional<Email>> requestEmailByEmailId(UUID emailId){
+//        try {
+//            var request = new
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
     public CompletableFuture<AuthResult> requestAutoAuth(String refreshToken, UUID userId) {
         try {
             var request = new RefreshRequest(userId, refreshToken);
