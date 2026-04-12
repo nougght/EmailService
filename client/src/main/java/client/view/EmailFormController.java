@@ -6,19 +6,19 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
 public class EmailFormController {
-    private EmailFormViewModel viewModel;
-
-    public void setViewModel(EmailFormViewModel vm){
-        viewModel = vm;
-
-//        receiverField.textProperty().bind(viewModel.getSubject());
-//        senderLabel.textProperty().bind(viewModel.getSender());
-//        receiverLabel.textProperty().bind(viewModel.getReceiver());
-//        bodyLabel.textProperty().bind(viewModel.getBody());
-
-
-
-    }
+//    private EmailFormViewModel viewModel;
+//
+//    public void setViewModel(EmailFormViewModel vm){
+//        viewModel = vm;
+//
+////        receiverField.textProperty().bind(viewModel.getSubject());
+////        senderLabel.textProperty().bind(viewModel.getSender());
+////        receiverLabel.textProperty().bind(viewModel.getReceiver());
+////        bodyLabel.textProperty().bind(viewModel.getBody());
+//
+//
+//
+//    }
 
     @FXML
     private TextField receiverField;
@@ -32,7 +32,8 @@ public class EmailFormController {
 
 
     public void handleSendClick(ActionEvent actionEvent){
-        viewModel.onSendClicked();
+
+//        viewModel.onSendClicked();
     }
 
 
