@@ -55,8 +55,13 @@ public class EmailService {
         }
         // если элемет найден в хранилище - возвращаем готовый результат
         return CompletableFuture.completedFuture(existing);
-
     }
+
+    public Optional<Email> getEmailByEmailId(UUID emailId) {
+        Optional<Email> existing = storage.getEmailByEmailId(emailId);
+        return existing;
+    }
+
 
     public ObservableList<Email> getEmailsList() {
         return storage.getAllEmails();

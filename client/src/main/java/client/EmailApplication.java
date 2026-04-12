@@ -1,12 +1,21 @@
 package client;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 
+import client.service.NavigationService;
+import client.view.EmailController;
 import client.view.MainController;
+import client.viewModel.EmailViewModel;
 import client.viewModel.MainViewModel;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Insets;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.*;
+import javafx.scene.text.Font;
 import org.javatuples.Pair;
 
 import client.network.TcpClient;
@@ -24,8 +33,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -44,78 +51,6 @@ public class EmailApplication extends Application {
         dataStorage = new DataStorage();
     }
 
-    public Pair<Parent, Object> getPageWithController(String name) throws IOException {
-        if (pages.containsKey(name)) {
-            return new Pair<Parent, Object>(pages.get(name), null);
-        }
-        var loader = new FXMLLoader(EmailApplication.class.getResource(name + ".fxml"));
-        return new Pair<Parent, Object>(loader.load(), loader.getController());
-    }
-
-    public void goToLoginPage(StackPane root) {
-        try {
-            var pair = getPageWithController("login-view");
-            Parent view = pair.getValue0();
-            LoginController controller = (LoginController) pair.getValue1();
-            if (controller != null) {
-                var vm = new LoginViewModel(authService, sessionService);
-                vm.getOnToRegistration().addListener((obj) -> {
-                    goToRegistrationPage(mainPane);
-                });
-                vm.getOnLoggedIn().addListener((obj) -> {
-                    goToMainPage(mainPane);
-                });
-                controller.setViewModel(vm);
-            }
-            root.getChildren().clear();
-            root.getChildren().add(view);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void goToRegistrationPage(StackPane root) {
-        try {
-            var pair = getPageWithController("registration-view");
-            Parent view = pair.getValue0();
-            RegistrationController controller = (RegistrationController) pair.getValue1();
-            if (controller != null) {
-                var vm = new RegistrationViewModel(this.authService, sessionService);
-                vm.getOnToLogin().addListener((obj) -> {
-                    goToLoginPage(mainPane);
-                });
-                vm.getOnRegistered().addListener((obj) -> {
-                    goToMainPage(mainPane);
-                });
-                controller.setViewModel(vm);
-            }
-            root.getChildren().clear();
-            root.getChildren().add(view);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void goToMainPage(StackPane root) {
-        try {
-            var pair = getPageWithController("main-view");
-            Parent view = pair.getValue0();
-            MainController controller = (MainController) pair.getValue1();
-            if (controller != null) {
-                var vm = new MainViewModel(authService, emailService, sessionService);
-                vm.getOnLogout().addListener(obj -> {
-                    Platform.runLater(() -> {
-                        goToLoginPage(mainPane);
-                    });
-                });
-                controller.setViewModel(vm);
-            }
-            root.getChildren().clear();
-            root.getChildren().add(view);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -130,60 +65,65 @@ public class EmailApplication extends Application {
         );
 
         tcpClient.start();
-        // temp
         System.out.println("start session");
-//        emailService.getUserByUserId(UUID.fromString("94c33924-fe82-46b1-9d2b-84942a7da794")).
-//                thenAccept(u -> {
-//                    dataStorage.addUser(u.get());
-//                    sessionService.setSession(u.get(), null, null);
-//                });
-
-//        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("main-view.fxml"));
-//        Parent root = fxmlLoader.load();
-//        HelloController controller = fxmlLoader.getController();
-//        controller.setViewModel(new EmailViewModel(emailService, sessionService));
 
 
-        mainPane = new StackPane();
-        Scene scene = new Scene(mainPane, 1000, 700);
-        stage.setTitle("Hello!");
-        stage.setScene(scene);
+        NavigationService navigationService = new NavigationService(authService, sessionService, emailService, stage);
+
         authService.tryAutoAuth().thenAccept(s -> {
             if (s.equals("success")) {
                 System.out.println("Successful auto auth");
-                Platform.runLater(() -> goToMainPage(mainPane));
+                Platform.runLater(() -> navigationService.goToMainPage());
 
             } else {
                 System.out.println("Auto auth failed: " + s);
-                Platform.runLater(() -> goToRegistrationPage(mainPane));
+                Platform.runLater(() -> navigationService.goToRegistrationPage());
             }
         });
-//        goToRegistrationPage(mainPane);
 
-
+        // вывод необработанных исключений в модальном окне
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            // лог + показать ошибку
+
             Stage modalStage = new Stage();
             modalStage.setTitle("Exception");
 
-            // 1. Set the modality to block the owner window
+
             modalStage.initModality(Modality.WINDOW_MODAL);
-            // 2. Set the owner (optional but recommended)
+
+
             modalStage.initOwner(stage);
 
-            Label label = new Label(throwable.toString());
+            Label label = new Label(String.format("%s\nSTACK TRACE:\n%s", throwable.toString(), Arrays.toString(throwable.getStackTrace())));
             label.setWrapText(true);
+            label.setFont(new Font(15));
+            label.setMinWidth(300);
             Button closeButton = new Button("Close Modal");
             closeButton.setOnAction(e -> modalStage.close());
 
-            VBox layout = new VBox(10);
-            layout.getChildren().addAll(label, closeButton);
+            VBox layout = new VBox();
+
+            ScrollPane scrollPane = new ScrollPane();
+            scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+            scrollPane.setMinHeight(400);
+            scrollPane.setPrefWidth(400);
+            layout.getChildren().addAll(scrollPane, closeButton);
+            layout.setSpacing(10);
             layout.setStyle("-fx-padding: 20;");
-            Scene modalScene = new Scene(layout, 300, 150);
+            VBox.setVgrow(scrollPane, Priority.ALWAYS);
+
+            scrollPane.setFitToWidth(true);
+            scrollPane.setContent(label);
+            scrollPane.setBorder(null);
+            scrollPane.setPadding(new Insets(10));
+
+            Scene modalScene = new Scene(layout, Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
 
             modalStage.setScene(modalScene);
 
-            // 3. Show the window and wait
+            Platform.runLater(() -> {
+                scrollPane.setVvalue(0);
+                modalStage.sizeToScene();
+            });
             modalStage.showAndWait();
         });
 

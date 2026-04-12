@@ -1,34 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CONTROLLER_NAME">
+<VBox  xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.view.EmailController">
    <children>
-      <VBox alignment="TOP_CENTER" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-         <children>
-            <Label prefHeight="3.0" prefWidth="346.0" text="Заголовок" />
-            <HBox prefHeight="101.0" prefWidth="600.0">
-               <children>
-                  <ImageView fitHeight="75" fitWidth="75.0" pickOnBounds="true" preserveRatio="true" />
-                  <AnchorPane prefHeight="52.0" prefWidth="525.0" HBox.hgrow="ALWAYS">
-                     <children>
-                        <VBox prefHeight="51.0" prefWidth="525.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-                           <children>
-                              <Label text="От кого" />
-                              <Label text="Кому" />
-                           </children>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-               </children>
-            </HBox>
-            <AnchorPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-               <children>
-                  <Label text="Текст" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" />
-               </children>
-            </AnchorPane>
-         </children></VBox>
+        <AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: white;       -fx-background-radius: 10;       -fx-border-radius: 10;       -fx-border-color: lightgray;">
+            <children>
+                <VBox alignment="CENTER" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+                    <children>
+                        <Label fx:id="subjectLabel" text="Заголовок" textAlignment="CENTER">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+                        <GridPane alignment="TOP_CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            </rowConstraints>
+                            <children>
+                                <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.rowSpan="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                                <Label text="Кому" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                <Label text="От кого" GridPane.columnIndex="1" />
+                                <Label fx:id="senderLabel" text="Отправитель" GridPane.columnIndex="2" />
+                                <Label fx:id="receiverLabel" text="Получатель" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                            </children>
+                        </GridPane>
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                            <children>
+                                <Label fx:id="bodyLabel" text="Текст" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" />
+                            </children>
+                        </AnchorPane>
+                        <HBox alignment="CENTER" prefWidth="600.0" spacing="15.0">
+                            <children>
+                                <Button fx:id="replyButton" mnemonicParsing="false" onAction="#handleReplyClick" text="Ответить" />
+                                <Button fx:id="forwardButton" mnemonicParsing="false" onAction="#handleForwardClick" text="Переслать" />
+                            </children>
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </padding>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </AnchorPane>
    </children>
-</AnchorPane>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>

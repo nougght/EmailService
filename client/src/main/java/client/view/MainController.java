@@ -10,11 +10,10 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
+
+import java.util.UUID;
 
 public class MainController {
 
@@ -24,6 +23,9 @@ public class MainController {
         this.viewModel = viewModel;
         userLabel.textProperty().bind(Bindings.selectString(viewModel.getCurrentUser(), "username"));
         emailsList.setItems(viewModel.getEmails());
+        emailsList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            viewModel.onEmailClicked(((Email)newVal).getEmailId());
+        });
 
         emailsList.setCellFactory(lv -> new ListCell<Email>(){
             private final VBox root = new VBox();
@@ -59,11 +61,17 @@ public class MainController {
                     subject.setText(email.getSubject());
                     from.setText(email.getSender().getUsername());
                     to.setText(email.getReceiver().getUsername());
+//                    onMouseClickedProperty().addListener( _ -> {
+//                        viewModel.onEmailClicked(email.getEmailId());
+//                    });
                     setGraphic(root);
                 }
             }
         });
     }
+
+    @FXML
+    private BorderPane borderPane;
 
     @FXML
     private Label userLabel;
@@ -72,6 +80,9 @@ public class MainController {
     private ListView emailsList;
 
 
+    public BorderPane getBorderPane() {
+        return borderPane;
+    }
 
     @FXML
     private void initialize(){
