@@ -15,8 +15,8 @@ public class MainViewModel {
     final private AuthService authService;
     final private EmailService emailService;
     final private SessionService sessionService;
-    public MainViewModel(AuthService authService, EmailService emailService, SessionService sessionService)
-    {
+
+    public MainViewModel(AuthService authService, EmailService emailService, SessionService sessionService) {
         this.authService = authService;
         this.emailService = emailService;
         this.sessionService = sessionService;
@@ -26,31 +26,35 @@ public class MainViewModel {
 
     private ObjectProperty<Object> onLogout = new SimpleObjectProperty<>();
     private ObjectProperty<UUID> onOpenEmail = new SimpleObjectProperty<>();
+    private ObjectProperty<Object> onNewEmail = new SimpleObjectProperty<>();
 
     private ObjectProperty<User> currentUser;
     private ObservableList<Email> emails;
+
+    public ObjectProperty<Object> getOnLogout() {
+        return onLogout;
+    }
+
+    public ObjectProperty<UUID> getOnOpenEmail() {
+        return onOpenEmail;
+    }
+    public ObjectProperty<Object> getOnNewEmail() {
+        return onNewEmail;
+    }
 
     public ObjectProperty<User> getCurrentUser() {
         return currentUser;
     }
 
-    public ObjectProperty<Object> getOnLogout()
-    {
-        return onLogout;
-    }
-    public ObjectProperty<UUID> getOnOpenEmail() {return onOpenEmail;}
-
     public ObservableList<Email> getEmails() {
         return emails;
     }
 
-    public void onRefreshClicked()
-    {
+    public void onRefreshClicked() {
         emailService.loadUserEmails(null);
     }
 
-    public void onLogoutClicked()
-    {
+    public void onLogoutClicked() {
         authService.logout().thenAccept(s -> {
             if (s.equals("success")) {
                 onLogout.set(new Object());
@@ -58,7 +62,11 @@ public class MainViewModel {
         });
     }
 
-    public void onEmailClicked(UUID emailId){
+    public void onEmailClicked(UUID emailId) {
         onOpenEmail.set(emailId);
+    }
+
+    public void onNewEmailClicked() {
+        onNewEmail.set(new Object());
     }
 }

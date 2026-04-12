@@ -1,10 +1,7 @@
 package client.service;
 
 import client.EmailApplication;
-import client.view.EmailController;
-import client.view.LoginController;
-import client.view.MainController;
-import client.view.RegistrationController;
+import client.view.*;
 import client.viewModel.EmailViewModel;
 import client.viewModel.LoginViewModel;
 import client.viewModel.MainViewModel;
@@ -14,6 +11,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -33,7 +31,7 @@ public class NavigationService {
     private final Stage mainStage;
     private final ArrayList<Stage> windows = new ArrayList<>();
     private StackPane rootPane;
-    private BorderPane borderPane;
+    private SplitPane splitPane;
 
     public NavigationService(AuthService authService, SessionService sessionService, EmailService emailService, Stage mainStage){
         this.authService = authService;
@@ -108,9 +106,12 @@ public class NavigationService {
             var pair = getOrCreateView("main-view");
             Parent view = pair.getValue0();
             MainController controller = (MainController) pair.getValue1();
-            borderPane = controller.getBorderPane();
+            splitPane = controller.getSplitPane();
             if (controller != null) {
                 var vm = new MainViewModel(authService, emailService, sessionService);
+                vm.getOnNewEmail().addListener(_ -> {
+                    addNewEmailWindow();
+                });
                 vm.getOnOpenEmail().addListener( (ObservableValue<? extends UUID> obs, UUID old, UUID id) -> {
                     showEmailView(id);
                 });
@@ -130,7 +131,7 @@ public class NavigationService {
 
     public void showEmailView(UUID emailId) {
         try {
-            var loader = new FXMLLoader(EmailApplication.class.getResource("email-vdfiew.fxml"));
+            var loader = new FXMLLoader(EmailApplication.class.getResource("email-view.fxml"));
 
             Parent emailView = loader.load();
             var contr = (EmailController)loader.getController();
@@ -140,7 +141,7 @@ public class NavigationService {
             EmailViewModel emailVM = new EmailViewModel(emailService, sessionService, optionalEmail.get());
             // to do: reply and forward buttons handling
             contr.setViewModel(emailVM);
-            borderPane.setCenter(emailView);
+            splitPane.getItems().set(2, emailView);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -150,10 +151,18 @@ public class NavigationService {
     public void addNewEmailWindow() {
         try {
             Stage stage = new Stage();
+            stage.initOwner(mainStage);
+
             var loader = new FXMLLoader(EmailApplication.class.getResource("email-form-view.fxml"));
-            // temp
-            Parent emailView = loader.load();
-            var contr = (EmailController) loader.getController();
+            Parent emailFormView = loader.load();
+            var contr = (EmailFormController) loader.getController();
+
+
+            Scene scene = new Scene(emailFormView);
+            stage.setScene(scene);
+            windows.add(stage);
+            stage.show();
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

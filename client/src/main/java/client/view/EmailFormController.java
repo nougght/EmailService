@@ -1,5 +1,6 @@
 package client.view;
 
+import client.viewModel.EmailFormViewModel;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;

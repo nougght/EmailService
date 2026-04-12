@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane prefHeight="334.0" prefWidth="434.0" styleClass="mainStackPane" stylesheets="@styles/base.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.view.MainController">
+<StackPane prefHeight="386.0" prefWidth="448.0" styleClass="mainStackPane" stylesheets="@styles/base.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.view.MainController">
    <children>
       <AnchorPane prefHeight="200.0" prefWidth="200.0">
          <children>
@@ -18,7 +18,8 @@
                         </MenuBar>
                         <ToolBar prefHeight="40.0" prefWidth="200.0">
                           <items>
-                            <Button mnemonicParsing="false" text="Написать" />
+                            <Button mnemonicParsing="false" text="Написать"
+                            onAction="#handleNewEmailClick"/>
                               <Button mnemonicParsing="false" text="Удалить" />
                               <Button mnemonicParsing="false" onAction="#handleLogoutClick" text="Выйти из аккаунта" />
                           </items>
@@ -26,20 +27,26 @@
                      </children>
                   </VBox>
                </top>
-               <left>
-                  <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
-                     <children>
-                        <HBox prefHeight="100.0" prefWidth="200.0">
-                           <children>
-                              <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleClick" prefHeight="25.0" prefWidth="71.0" text="Refresh" textAlignment="CENTER" />
-                           </children>
-                        </HBox>
-                        <ListView fx:id="emailsList" />
-                     </children>
-                  </VBox>
-               </left>
                <center>
-                  <Label fx:id="userLabel" text="Label" BorderPane.alignment="CENTER" />
+                  <SplitPane fx:id="splitPane" dividerPositions="0.23842592592592593, 0.5162037037037037" BorderPane.alignment="TOP_LEFT">
+                     <items>
+                        <VBox maxWidth="1.7976931348623157E308" minWidth="100.0">
+                           <children>
+                              <TreeView prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                           </children></VBox>
+                        <VBox maxWidth="1.7976931348623157E308" minWidth="100.0">
+                           <children>
+                              <HBox prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleClick" prefHeight="25.0" prefWidth="71.0" text="Refresh" textAlignment="CENTER" />
+                                 </children>
+                              </HBox>
+                              <ListView fx:id="emailsList" />
+                           </children>
+                        </VBox>
+                        <Label fx:id="userLabel" alignment="TOP_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="100.0" text="Label" />
+                     </items>
+                  </SplitPane>
                </center>
             </BorderPane>
          </children>
