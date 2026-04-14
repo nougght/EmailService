@@ -3,11 +3,13 @@ package server.network;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.json.JSONObject;
 import server.mapper.EmailMapper;
 import server.mapper.UserMapper;
 import server.model.User;
+import server.network.message.Message;
+import server.network.message.MessageDeserializer;
 import server.network.request.*;
 import server.network.response.*;
 import server.services.AuthService;
@@ -17,9 +19,7 @@ import server.services.UserService;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ClientHandler implements Runnable {
@@ -31,13 +31,21 @@ public class ClientHandler implements Runnable {
     final private EmailService emailService;
     final private UserService userService;
     final private ObjectMapper jsonMapper = new ObjectMapper();
+    final private MessageDeserializer deserializer = new MessageDeserializer();
+
+    final private HashMap<String, Object> handlers = new HashMap<>(Map.ofEntries(
+
+    ));
 
     ClientHandler(Socket socket, AuthService authService, EmailService emailService, UserService userService) {
         this.socket = socket;
         this.authService = authService;
         this.emailService = emailService;
         this.userService = userService;
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Message.class, new MessageDeserializer());
         jsonMapper.registerModule(new JavaTimeModule());
+        jsonMapper.registerModule(module);
         jsonMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         System.out.println("New Handler");
@@ -58,10 +66,16 @@ public class ClientHandler implements Runnable {
                 if (message == null)
                     continue;
 
-                System.out.println("new message" + message);
-                JSONObject msg = new JSONObject(message);
-                String type = msg.getString("type");
-                handleRequest(message, type);
+//                System.out.println("new message" + message);
+//                JSONObject msg = new JSONObject(message);
+//                String type = msg.getString("type");
+
+                Message msg = jsonMapper.readValue(message, Message.class);
+
+                if (msg instanceof Request) {
+                    handleRequest((Request) msg);
+                }
+
             } catch (IOException i) {
                 System.out.println(i.toString());
                 return;
@@ -69,27 +83,27 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void handleRequest(String jsonRequest, String type) {
+    public void handleRequest(Request request) {
         try {
 
-            switch (type) {
+            switch (request.getType()) {
                 case "Registration":
-                    registrationHandler(jsonMapper.readValue(jsonRequest, RegistrationRequest.class));
+                    registrationHandler((RegistrationRequest) request);
                     break;
                 case "Login":
-                    loginHandler(jsonMapper.readValue(jsonRequest, LoginRequest.class));
+                    loginHandler((LoginRequest) request);
                     break;
                 case "Refresh":
-                    refreshHandler(jsonMapper.readValue(jsonRequest, RefreshRequest.class));
+                    refreshHandler((RefreshRequest) request);
                     break;
                 case "Logout":
-                    logoutHandler(jsonMapper.readValue(jsonRequest, LogoutRequest.class));
+                    logoutHandler((LogoutRequest) request);
                     break;
                 case "GetEmails":
-                    getEmailsHandler(jsonMapper.readValue(jsonRequest, GetEmailsRequest.class));
+                    getEmailsHandler((GetEmailsRequest) request);
                     break;
                 case "GetUser":
-                    getUserHandler(jsonMapper.readValue(jsonRequest, GetUserRequest.class));
+                    getUserHandler((GetUserRequest) request);
                     break;
             }
         } catch (Exception e) {
