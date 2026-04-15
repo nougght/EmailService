@@ -11,6 +11,7 @@ import client.dto.UserDTO;
 import client.mapper.EmailMapper;
 import client.mapper.UserMapper;
 import client.model.Email;
+import client.model.EmailSending;
 import client.model.User;
 import client.network.TcpClient;
 import client.storage.DataStorage;
@@ -26,7 +27,7 @@ public class EmailService {
         this.tcpClient = tcpClient;
         this.sessionService = sessionService;
         this.storage = storage;
-        
+
 
         sessionService.addListener(s -> {
             //temp: нужно исключить возможность гонки данных, реализовать возможность отмены задачи
@@ -90,6 +91,7 @@ public class EmailService {
         });
     }
 
+
 //    public CompletableFuture<ArrayList<Email>> loadUserEmails(UUID userId) {
 //
 //        return tcpClient.requestAllUserEmails(userId).thenCompose(lst -> {
@@ -103,6 +105,20 @@ public class EmailService {
 //                }
 //        );
 //    }
+
+    public CompletableFuture<Optional<Email>> sendEmail(EmailSending email) {
+        return tcpClient.requestSendEmail(email).thenCompose(dto -> {
+                    // to do: ограничить параллельную работу convert из-за возможной перегрузки
+                    if (dto.isEmpty())
+                        return CompletableFuture.completedFuture(Optional.<Email>empty());
+                    return convert(dto.get()).thenApply(e -> {
+                        Platform.runLater(() -> storage.addEmail(e));
+                        return Optional.of(e);
+
+                    });
+                }
+        );
+    }
 
     public User convert(UserDTO dto) {
         var user = UserMapper.fromDTO(dto);

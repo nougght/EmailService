@@ -26,12 +26,14 @@ public class MessageDeserializer extends StdDeserializer<Message> {
             case "REQUEST:Logout"  -> p.getCodec().treeToValue(node, LogoutRequest.class);
             case "REQUEST:GetUser"  -> p.getCodec().treeToValue(node, GetUserRequest.class);
             case "REQUEST:GetEmails"  -> p.getCodec().treeToValue(node, GetEmailsRequest.class);
+            case "REQUEST:SendEmail"    -> p.getCodec().treeToValue(node, SendEmailRequest.class);
             case "RESPONSE:Registration"   -> p.getCodec().treeToValue(node, RegistrationResponse.class);
             case "RESPONSE:Refresh" -> p.getCodec().treeToValue(node, RefreshResponse.class);
             case "RESPONSE:Login"   -> p.getCodec().treeToValue(node, LoginResponse.class);
             case "RESPONSE:Logout"   -> p.getCodec().treeToValue(node, LogoutResponse.class);
             case "RESPONSE:GetUser"   -> p.getCodec().treeToValue(node, GetUserResponse.class);
             case "RESPONSE:GetEmails"   -> p.getCodec().treeToValue(node, GetEmailsResponse.class);
+            case "RESPONSE:SendEmail"   -> p.getCodec().treeToValue(node, SendEmailResponse.class);
             default -> throw new JsonParseException(p, "Unknown type: " + kind + ":" + type);
         };
     }

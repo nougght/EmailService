@@ -2,10 +2,7 @@ package client.service;
 
 import client.EmailApplication;
 import client.view.*;
-import client.viewModel.EmailViewModel;
-import client.viewModel.LoginViewModel;
-import client.viewModel.MainViewModel;
-import client.viewModel.RegistrationViewModel;
+import client.viewModel.*;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
@@ -156,7 +153,12 @@ public class NavigationService {
             var loader = new FXMLLoader(EmailApplication.class.getResource("email-form-view.fxml"));
             Parent emailFormView = loader.load();
             var contr = (EmailFormController) loader.getController();
+            EmailFormViewModel vm = new EmailFormViewModel(emailService, sessionService);
 
+            vm.getOnEmailSent().addListener((obj) -> {
+                stage.close();
+            });
+            contr.setViewModel(vm);
 
             Scene scene = new Scene(emailFormView);
             stage.setScene(scene);

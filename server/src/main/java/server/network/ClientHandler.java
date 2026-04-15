@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import server.mapper.EmailMapper;
 import server.mapper.UserMapper;
+import server.model.Email;
 import server.model.User;
 import server.network.message.Message;
 import server.network.message.MessageDeserializer;
@@ -66,7 +67,7 @@ public class ClientHandler implements Runnable {
                 if (message == null)
                     continue;
 
-//                System.out.println("new message" + message);
+                System.out.println("new message" + message);
 //                JSONObject msg = new JSONObject(message);
 //                String type = msg.getString("type");
 
@@ -104,6 +105,9 @@ public class ClientHandler implements Runnable {
                     break;
                 case "GetUser":
                     getUserHandler((GetUserRequest) request);
+                    break;
+                case "SendEmail":
+                    sendEmailHandler((SendEmailRequest) request);
                     break;
             }
         } catch (Exception e) {
@@ -247,11 +251,11 @@ public class ClientHandler implements Runnable {
         String accessToken = null;
         if (!isValid) {
             status = "invalid refresh token";
-        } else if (optionalUser.isEmpty()){
-            status="not found";
+        } else if (optionalUser.isEmpty()) {
+            status = "not found";
         } else {
             user = optionalUser.get();
-            status="success";
+            status = "success";
             accessToken = authService.genAccessToken(request.getUserId());
         }
         try {
@@ -259,6 +263,40 @@ public class ClientHandler implements Runnable {
                     status,
                     UserMapper.toDTO(user),
                     accessToken
+            );
+            var json = jsonMapper.writeValueAsString(response);
+            sOut.println(json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendEmailHandler(SendEmailRequest request) {
+        try {
+            var status = "fail";
+            Email email = null;
+            var optionalReceiver = userService.getUserByUsername(request.getReceiverUsername());
+            if (optionalReceiver.isPresent()) {
+                var optionalEmail = emailService.addEmail(new Email(
+                        null,
+                        request.getSenderId(),
+                        optionalReceiver.get().getUserId(),
+                        request.getSubject(),
+                        request.getBody(),
+                        null,
+                        null,
+                        null
+                ));
+                if (optionalEmail.isPresent()) {
+                    status = "success";
+                    email = optionalEmail.get();
+                    // TODO send notification
+                }
+            }
+            var response = new SendEmailResponse(
+                    request.getRequestId(),
+                    status,
+                    EmailMapper.toDTO(email)
             );
             var json = jsonMapper.writeValueAsString(response);
             sOut.println(json);
