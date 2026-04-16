@@ -75,6 +75,11 @@ public class Email {
         this.receiver = receiver;
     }
 
+    public void setSenderId(UUID senderId) {this.senderId = senderId;}
+    public void setReceiverId(UUID receiverId) {this.receiverId = receiverId;}
+
+
+
     public Boolean isInbox() {
         return type.equals("inbox");
     }

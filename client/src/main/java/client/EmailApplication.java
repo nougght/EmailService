@@ -52,6 +52,7 @@ public class EmailApplication extends Application {
     }
 
 
+
     @Override
     public void start(Stage stage) throws IOException {
 

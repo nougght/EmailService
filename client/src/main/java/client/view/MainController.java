@@ -10,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SplitPane;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 
@@ -24,10 +25,10 @@ public class MainController {
         userLabel.textProperty().bind(Bindings.selectString(viewModel.getCurrentUser(), "username"));
         emailsList.setItems(viewModel.getEmails());
         emailsList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            viewModel.onEmailClicked(((Email)newVal).getEmailId());
+            viewModel.onEmailClicked(((Email) newVal).getEmailId());
         });
 
-        emailsList.setCellFactory(lv -> new ListCell<Email>(){
+        emailsList.setCellFactory(lv -> new ListCell<Email>() {
             private final VBox root = new VBox();
             private final HBox row = new HBox();
             private final Label subject = new Label();
@@ -49,15 +50,13 @@ public class MainController {
             }
 
             @Override
-            protected  void updateItem(Email email, boolean empty)
-            {
+            protected void updateItem(Email email, boolean empty) {
                 super.updateItem(email, empty);
 
 
-                if (empty || email == null){
+                if (empty || email == null) {
                     setGraphic(null);
-                }
-                else{
+                } else {
                     subject.setText(email.getSubject());
                     from.setText(email.getSender().getUsername());
                     to.setText(email.getReceiver().getUsername());
@@ -74,6 +73,9 @@ public class MainController {
     private BorderPane borderPane;
 
     @FXML
+    private SplitPane splitPane;
+
+    @FXML
     private Label userLabel;
 
     @FXML
@@ -84,8 +86,12 @@ public class MainController {
         return borderPane;
     }
 
+    public SplitPane getSplitPane() {
+        return splitPane;
+    }
+
     @FXML
-    private void initialize(){
+    private void initialize() {
     }
 //    @FXML
 //    protected void onHelloButtonClick() {
@@ -95,7 +101,12 @@ public class MainController {
     public void handleClick(ActionEvent actionEvent) {
         viewModel.onRefreshClicked();
     }
-    public void handleLogoutClick(ActionEvent actionEvent){
+
+    public void handleLogoutClick(ActionEvent actionEvent) {
         viewModel.onLogoutClicked();
+    }
+
+    public void handleNewEmailClick(ActionEvent actionEvent) {
+        viewModel.onNewEmailClicked();
     }
 }
