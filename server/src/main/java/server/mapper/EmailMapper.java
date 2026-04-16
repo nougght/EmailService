@@ -8,6 +8,7 @@ import java.util.UUID;
 public class EmailMapper {
 
     public static EmailDTO toDTO(Email email) {
+        if (email == null) return null;
         return new EmailDTO(
                 email.getEmailId(),
                 email.getSenderId(),

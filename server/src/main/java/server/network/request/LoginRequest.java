@@ -11,7 +11,7 @@ public class LoginRequest extends Request{
 
     public LoginRequest(String username, String password)
     {
-        super("Registration");
+        super("Login");
         this.username = username;
         this.password = password;
     }

@@ -1,18 +1,24 @@
 package client.network;
 
 import client.dto.EmailDTO;
+import client.model.Email;
+import client.network.message.Message;
+import client.network.message.MessageDeserializer;
+import client.network.notification.NewEmailNotification;
+import client.network.notification.Notification;
 import client.network.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.json.JSONObject;
 
 import javax.net.ssl.SSLSocket;
 import java.io.*;
-import java.net.Socket;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 // прослушивание запросов и ответов от сервера в отдельном потоке
 public class TcpListener extends Thread{
@@ -21,6 +27,7 @@ public class TcpListener extends Thread{
     private PrintWriter sOut = null;
     final private ObjectMapper jsonMapper = new ObjectMapper();
 
+    final private BlockingQueue<Notification> notifications = new LinkedBlockingQueue<>();
     final private ConcurrentHashMap<UUID, CompletableFuture<Response>> pendingResponses;
 
     TcpListener(SSLSocket socket, ConcurrentHashMap<UUID, CompletableFuture<Response>> responses)
@@ -28,6 +35,9 @@ public class TcpListener extends Thread{
         super();
         this.socket = socket;
         this.pendingResponses = responses;
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Message.class, new MessageDeserializer());
+        jsonMapper.registerModule(module);
         jsonMapper.registerModule(new JavaTimeModule());
         jsonMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         try {
@@ -40,30 +50,36 @@ public class TcpListener extends Thread{
         }
     }
 
+    public BlockingQueue<Notification> getNotifications() {return notifications;}
+
     public void run()
     {
         System.out.println("Tcp Listener...");
         try {
-            String jsonResponse = "";
+            String message = "";
             while(true)
             {
-                jsonResponse = sIn.readLine();
+                message = sIn.readLine();
 
-                System.out.println("TCP Listener received message: " + jsonResponse);
+                System.out.println("TCP Listener received message: " + message);
 
-                JSONObject resp = new JSONObject(jsonResponse);
-                UUID requestId = UUID.fromString(resp.getString("requestId"));
-                String type = resp.getString("type");
+//                JSONObject resp = new JSONObject(jsonResponse);
+//                UUID requestId = UUID.fromString(resp.getString("requestId"));
+//                String type = resp.getString("type");
+                Message msg = jsonMapper.readValue(message, Message.class);
 
                 // если полученное сообщение - ожидаемый ответ на один из запросов
-                if (pendingResponses.containsKey(requestId))
+                if (msg.getKind().equals("RESPONSE"))
                 {
-                    handleResponse(jsonResponse, type);
+                    handleResponse((Response) msg);
                 }
                 // иначе - это команда/сообщение от сервера
                 else
                 {
-                    handleServerMessage(jsonResponse, type);
+                    var ok = notifications.offer((Notification) msg);
+                    if (!ok) {
+                        System.out.println("Blocking queue error ");
+                    }
                 }
             }
 
@@ -72,39 +88,39 @@ public class TcpListener extends Thread{
         }
     }
 
-    public void handleResponse(String jsonResponse, String type)
+    public void handleResponse(Response response)
     {
-        Response response = null;
-        try {
-            switch (type) {
-                case "Registration":
-                    response = jsonMapper.readValue(jsonResponse, RegistrationResponse.class);
-                    break;
-                case "Login":
-                    response = jsonMapper.readValue(jsonResponse, LoginResponse.class);
-                    break;
-                case "Refresh":
-                    response = jsonMapper.readValue(jsonResponse, RefreshResponse.class);
-                    break;
-                case "Logout":
-                    response = jsonMapper.readValue(jsonResponse, LogoutResponse.class);
-                    break;
-                case "GetUser":
-                    response = jsonMapper.readValue(jsonResponse, GetUserResponse.class);
-                    break;
-                case "GetEmails":
-                    response = jsonMapper.readValue(jsonResponse, GetEmailsResponse.class);
-                    break;
-                case "SendEmail":
-//                    response = jsonMapper.readValue(jsonResponse, )
-                    break;
-            }
-        }
-        catch(Exception e)
-        {
-            System.out.println(e.toString());
-            throw new RuntimeException(e.toString());
-        }
+//        Response response = null;
+//        try {
+//            switch (type) {
+//                case "Registration":
+//                    response = jsonMapper.readValue(jsonResponse, RegistrationResponse.class);
+//                    break;
+//                case "Login":
+//                    response = jsonMapper.readValue(jsonResponse, LoginResponse.class);
+//                    break;
+//                case "Refresh":
+//                    response = jsonMapper.readValue(jsonResponse, RefreshResponse.class);
+//                    break;
+//                case "Logout":
+//                    response = jsonMapper.readValue(jsonResponse, LogoutResponse.class);
+//                    break;
+//                case "GetUser":
+//                    response = jsonMapper.readValue(jsonResponse, GetUserResponse.class);
+//                    break;
+//                case "GetEmails":
+//                    response = jsonMapper.readValue(jsonResponse, GetEmailsResponse.class);
+//                    break;
+//                case "SendEmail":
+////                    response = jsonMapper.readValue(jsonResponse, )
+//                    break;
+//            }
+//        }
+//        catch(Exception e)
+//        {
+//            System.out.println(e.toString());
+//            throw new RuntimeException(e.toString());
+//        }
 
         if (response == null)
             return;
@@ -114,10 +130,6 @@ public class TcpListener extends Thread{
         future.complete(response);
     }
 
-    public void handleServerMessage(String jsonMessage, String type)
-    {
-
-    }
 
     public void newEmailHandler(EmailDTO email)
     {

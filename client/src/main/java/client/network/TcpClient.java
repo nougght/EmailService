@@ -4,6 +4,8 @@ import client.dto.EmailDTO;
 import client.dto.UserDTO;
 import client.model.AuthResult;
 import client.model.Email;
+import client.model.EmailSending;
+import client.network.notification.Notification;
 import client.network.request.*;
 import client.network.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +38,7 @@ public class TcpClient extends Thread {
 
     final private ObjectMapper jsonMapper = new ObjectMapper();
 
-    final private BlockingQueue requests = new LinkedBlockingQueue<String>();
+    final private BlockingQueue<String> requests = new LinkedBlockingQueue<String>();
     final private ConcurrentHashMap<UUID, CompletableFuture<Response>> pendingResponses = new ConcurrentHashMap<>();
 
     public TcpClient(String host, int port) {
@@ -45,6 +47,10 @@ public class TcpClient extends Thread {
         jsonMapper.registerModule(new JavaTimeModule());
         jsonMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
+    }
+
+    public BlockingQueue<Notification> getNotifications() {
+        return serverListener.getNotifications();
     }
 
     public void setAccessToken(String accessToken) {
@@ -97,8 +103,7 @@ public class TcpClient extends Thread {
     }
 
 
-
-    public CompletableFuture<AuthResult> requestRegistration(String username, String password){
+    public CompletableFuture<AuthResult> requestRegistration(String username, String password) {
         try {
             var request = new RegistrationRequest(username, password);
             String jsonRequest = jsonMapper.writeValueAsString(request);
@@ -107,14 +112,14 @@ public class TcpClient extends Thread {
             requests.put(jsonRequest);
             return future.thenApply(resp -> {
                 var response = (RegistrationResponse) resp;
-                return new AuthResult(response.getStatus(),response.getUser(), response.getAccessToken(), response.getRefreshToken());
+                return new AuthResult(response.getStatus(), response.getUser(), response.getAccessToken(), response.getRefreshToken());
             });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public CompletableFuture<AuthResult> requestLogin(String username, String password){
+    public CompletableFuture<AuthResult> requestLogin(String username, String password) {
         try {
             var request = new LoginRequest(username, password);
 
@@ -124,14 +129,14 @@ public class TcpClient extends Thread {
             requests.put(jsonRequest);
             return future.thenApply(resp -> {
                 var response = (LoginResponse) resp;
-                return new AuthResult(response.getStatus(),response.getUser(), response.getAccessToken(), response.getRefreshToken());
+                return new AuthResult(response.getStatus(), response.getUser(), response.getAccessToken(), response.getRefreshToken());
             });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public CompletableFuture<String> requestLogout(UUID userId){
+    public CompletableFuture<String> requestLogout(UUID userId) {
         try {
             var request = new LogoutRequest();
             request.setAccessToken(accessToken);
@@ -145,7 +150,7 @@ public class TcpClient extends Thread {
                 var response = (LogoutResponse) resp;
                 return response.getStatus();
             });
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -220,7 +225,35 @@ public class TcpClient extends Thread {
         }
     }
 
-//    public CompletableFuture<Optional<Email>> requestEmailByEmailId(UUID emailId){
+
+    public CompletableFuture<Optional<EmailDTO>> requestSendEmail(EmailSending emailSending) {
+        try {
+            var request = new SendEmailRequest(
+                    emailSending.getSenderId(),
+                    emailSending.getReceiverUsername(),
+                    emailSending.getSubject(),
+                    emailSending.getBody()
+            );
+            request.setAccessToken(accessToken);
+
+            String jsonRequest = jsonMapper.writeValueAsString(request);
+            var future = new CompletableFuture<Response>();
+            pendingResponses.put(request.getRequestId(), future);
+            requests.put(jsonRequest);
+            return future.thenApply(resp -> {
+                var response = (SendEmailResponse) resp;
+                if (response.getStatus().equals("success")) {
+                    return Optional.ofNullable(response.getEmailDTO());
+                }
+                return Optional.<EmailDTO>empty();
+            });
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //    public CompletableFuture<Optional<Email>> requestEmailByEmailId(UUID emailId){
 //        try {
 //            var request = new
 //        } catch (Exception e) {
@@ -241,8 +274,7 @@ public class TcpClient extends Thread {
                 var response = (RefreshResponse) resp;
                 return new AuthResult(response.getStatus(), response.getUser(), response.getAccessToken(), null);
             });
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

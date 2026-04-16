@@ -3,11 +3,16 @@ package server.network;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.json.JSONObject;
 import server.mapper.EmailMapper;
 import server.mapper.UserMapper;
+import server.model.Email;
 import server.model.User;
+import server.network.message.Message;
+import server.network.message.MessageDeserializer;
+import server.network.notification.NewEmailNotification;
+import server.network.notification.Notification;
 import server.network.request.*;
 import server.network.response.*;
 import server.services.AuthService;
@@ -17,27 +22,40 @@ import server.services.UserService;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
+
+import static java.lang.System.in;
 
 public class ClientHandler implements Runnable {
 
     Socket socket;
     private BufferedReader sIn = null;
     private PrintWriter sOut = null;
-    final private AuthService authService;
-    final private EmailService emailService;
-    final private UserService userService;
-    final private ObjectMapper jsonMapper = new ObjectMapper();
+    private final AuthService authService;
+    private final EmailService emailService;
+    private final UserService userService;
+    private final ObjectMapper jsonMapper = new ObjectMapper();
+    private final MessageDeserializer deserializer = new MessageDeserializer();
+    private final BlockingQueue<Notification> notifications = new LinkedBlockingQueue<>();
+    private final ConnectionManager connectionManager;
+    private UUID userId;
 
-    ClientHandler(Socket socket, AuthService authService, EmailService emailService, UserService userService) {
+
+
+    ClientHandler(Socket socket, AuthService authService, EmailService emailService, UserService userService, ConnectionManager connectionManager) {
         this.socket = socket;
         this.authService = authService;
         this.emailService = emailService;
         this.userService = userService;
+        this.connectionManager = connectionManager;
+
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Message.class, new MessageDeserializer());
         jsonMapper.registerModule(new JavaTimeModule());
+        jsonMapper.registerModule(module);
         jsonMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         System.out.println("New Handler");
@@ -49,8 +67,26 @@ public class ClientHandler implements Runnable {
         }
     }
 
+
+    public void send(Notification ntf) {
+        notifications.offer(ntf);
+    }
+
     @Override
     public void run() {
+        new Thread(() -> {
+            while (true) {
+                try {
+                    var ntf = notifications.take();
+                    var jsonNotification = jsonMapper.writeValueAsString(ntf);
+                    sOut.println(jsonNotification);
+                    System.out.println("sent new notification " + jsonNotification);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+
         String message = "";
         while (true) {
             try {
@@ -59,37 +95,47 @@ public class ClientHandler implements Runnable {
                     continue;
 
                 System.out.println("new message" + message);
-                JSONObject msg = new JSONObject(message);
-                String type = msg.getString("type");
-                handleRequest(message, type);
+//                JSONObject msg = new JSONObject(message);
+//                String type = msg.getString("type");
+
+                Message msg = jsonMapper.readValue(message, Message.class);
+
+                if (msg instanceof Request) {
+                    handleRequest((Request) msg);
+                }
+
             } catch (IOException i) {
                 System.out.println(i.toString());
+                connectionManager.removeHandler(userId, this);
                 return;
             }
         }
     }
 
-    public void handleRequest(String jsonRequest, String type) {
+    public void handleRequest(Request request) {
         try {
 
-            switch (type) {
+            switch (request.getType()) {
                 case "Registration":
-                    registrationHandler(jsonMapper.readValue(jsonRequest, RegistrationRequest.class));
+                    registrationHandler((RegistrationRequest) request);
                     break;
                 case "Login":
-                    loginHandler(jsonMapper.readValue(jsonRequest, LoginRequest.class));
+                    loginHandler((LoginRequest) request);
                     break;
                 case "Refresh":
-                    refreshHandler(jsonMapper.readValue(jsonRequest, RefreshRequest.class));
+                    refreshHandler((RefreshRequest) request);
                     break;
                 case "Logout":
-                    logoutHandler(jsonMapper.readValue(jsonRequest, LogoutRequest.class));
+                    logoutHandler((LogoutRequest) request);
                     break;
                 case "GetEmails":
-                    getEmailsHandler(jsonMapper.readValue(jsonRequest, GetEmailsRequest.class));
+                    getEmailsHandler((GetEmailsRequest) request);
                     break;
                 case "GetUser":
-                    getUserHandler(jsonMapper.readValue(jsonRequest, GetUserRequest.class));
+                    getUserHandler((GetUserRequest) request);
+                    break;
+                case "SendEmail":
+                    sendEmailHandler((SendEmailRequest) request);
                     break;
             }
         } catch (Exception e) {
@@ -109,6 +155,7 @@ public class ClientHandler implements Runnable {
                     request.getRequestId(),
                     "success"
             ));
+            connectionManager.removeHandler(userId, this);
             sOut.println(json);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -191,6 +238,8 @@ public class ClientHandler implements Runnable {
                 authService.addRefreshToken(UUID.randomUUID().toString(), user.getUserId());
                 response.setAccessToken(authService.genAccessToken(user.getUserId()));
                 response.setRefreshToken(refreshToken);
+                userId = user.getUserId();
+                connectionManager.addClient(userId, this);
             }
             var json = jsonMapper.writeValueAsString(response);
             sOut.println(json);
@@ -217,6 +266,8 @@ public class ClientHandler implements Runnable {
                 authService.addRefreshToken(refreshToken, user.getUserId());
                 response.setAccessToken(authService.genAccessToken(user.getUserId()));
                 response.setRefreshToken(refreshToken);
+                userId = user.getUserId();
+                connectionManager.addClient(userId, this);
             }
             var json = jsonMapper.writeValueAsString(response);
             sOut.println(json);
@@ -233,18 +284,62 @@ public class ClientHandler implements Runnable {
         String accessToken = null;
         if (!isValid) {
             status = "invalid refresh token";
-        } else if (optionalUser.isEmpty()){
-            status="not found";
+        } else if (optionalUser.isEmpty()) {
+            status = "not found";
         } else {
             user = optionalUser.get();
-            status="success";
+            status = "success";
             accessToken = authService.genAccessToken(request.getUserId());
+            userId = user.getUserId();
+            connectionManager.addClient(userId, this);
         }
         try {
             var response = new RefreshResponse(request.getRequestId(),
                     status,
                     UserMapper.toDTO(user),
                     accessToken
+            );
+            var json = jsonMapper.writeValueAsString(response);
+            sOut.println(json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendEmailHandler(SendEmailRequest request) {
+        try {
+            var status = "fail";
+            Email email = null;
+            var optionalReceiver = userService.getUserByUsername(request.getReceiverUsername());
+            if (optionalReceiver.isPresent()) {
+                var optionalEmail = emailService.addEmail(new Email(
+                        null,
+                        request.getSenderId(),
+                        optionalReceiver.get().getUserId(),
+                        request.getSubject(),
+                        request.getBody(),
+                        null,
+                        null,
+                        null
+                ));
+                if (optionalEmail.isPresent()) {
+                    status = "success";
+                    email = optionalEmail.get();
+                    // TODO send notification
+                    var handlers = connectionManager.get(email.getReceiverId());
+                    for (var h : handlers) {
+                        h.send(
+                                new NewEmailNotification(
+                                        EmailMapper.toDTO(email)
+                                )
+                        );                    }
+
+                }
+            }
+            var response = new SendEmailResponse(
+                    request.getRequestId(),
+                    status,
+                    EmailMapper.toDTO(email)
             );
             var json = jsonMapper.writeValueAsString(response);
             sOut.println(json);

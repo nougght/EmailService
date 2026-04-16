@@ -1,17 +1,21 @@
 package client.network.request;
 
+import client.network.message.Message;
+
 import java.util.UUID;
 
 
-public abstract class Request {
+// запрос от клиента к серверу
+public abstract class Request extends Message {
     protected UUID requestId;
-    protected String type;
     protected String accessToken;
 
-    public Request(){}
+    public Request(){
+        super();
+    }
 
     public Request(String type) {
-        this.type = type;
+        super("REQUEST", type);
         this.requestId = UUID.randomUUID();
     }
 
@@ -19,9 +23,6 @@ public abstract class Request {
         return requestId;
     }
 
-    public String getType() {
-        return type;
-    }
 
     public String getAccessToken() {
         return accessToken;
@@ -31,9 +32,6 @@ public abstract class Request {
         this.requestId = requestId;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;

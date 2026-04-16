@@ -7,7 +7,7 @@ import java.util.UUID;
 public class GetEmailsRequest extends Request {
     private UUID userId;
 
-    GetEmailsRequest() {
+    public GetEmailsRequest() {
         super();
     }
 

@@ -59,4 +59,8 @@ public class DataStorage {
     public void addUser(User user){
         users.add(user);
     }
+
+    public void addEmail(Email email){
+        emails.add(email);
+    }
 }
