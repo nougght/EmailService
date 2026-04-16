@@ -24,7 +24,7 @@ public class DatabaseManager {
         catch (SQLException ex)
         {
             System.out.println(ex.toString());
-            return null;
+            throw new RuntimeException(ex);
         }
     }
 }

@@ -8,11 +8,14 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
+import server.network.ConnectionManager;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.security.KeyStore;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TcpServer {
 
@@ -20,9 +23,11 @@ public class TcpServer {
     //    private Socket sock = null;
     private DataInputStream in = null;
 
-    final private AuthService authService;
-    final private EmailService emailService;
-    final private UserService userService;
+    private final AuthService authService;
+    private final EmailService emailService;
+    private final UserService userService;
+    private final ConnectionManager connectionManager = new ConnectionManager();
+
 
     public TcpServer(int port, AuthService authService, EmailService emailService, UserService userService) {
         this.authService = authService;
@@ -54,7 +59,7 @@ public class TcpServer {
                 var socket = ssock.accept();
                 System.out.print("New Connection: ");
                 System.out.println(socket.getInetAddress());
-                new Thread(new ClientHandler(socket, authService, emailService, userService)).start();
+                new Thread(new ClientHandler(socket, authService, emailService, userService, connectionManager)).start();
 
             }
 

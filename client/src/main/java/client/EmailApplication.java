@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 
+import client.network.notification.NewEmailNotification;
+import client.network.notification.Notification;
 import client.service.NavigationService;
 import client.view.EmailController;
 import client.view.MainController;
@@ -82,6 +84,8 @@ public class EmailApplication extends Application {
             }
         });
 
+
+
         // вывод необработанных исключений в модальном окне
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
 
@@ -129,5 +133,19 @@ public class EmailApplication extends Application {
         });
 
         stage.show();
+        // TODO move to another place
+        new Thread(()-> {
+            while (true) {
+                try {
+                    var ntf = tcpClient.getNotifications().take();
+                    var type = ntf.getType();
+                    switch (type) {
+                        case "NewEmail" -> emailService.addEmail(((NewEmailNotification)ntf).getEmailDTO());
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
     }
 }

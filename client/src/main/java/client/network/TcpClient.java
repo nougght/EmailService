@@ -5,6 +5,7 @@ import client.dto.UserDTO;
 import client.model.AuthResult;
 import client.model.Email;
 import client.model.EmailSending;
+import client.network.notification.Notification;
 import client.network.request.*;
 import client.network.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,6 +47,10 @@ public class TcpClient extends Thread {
         jsonMapper.registerModule(new JavaTimeModule());
         jsonMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
+    }
+
+    public BlockingQueue<Notification> getNotifications() {
+        return serverListener.getNotifications();
     }
 
     public void setAccessToken(String accessToken) {

@@ -120,6 +120,15 @@ public class EmailService {
         );
     }
 
+    public void addEmail(EmailDTO dto){
+        convert(dto).thenAccept(e -> {
+            Platform.runLater(() -> {
+                storage.addEmail(e);
+            });
+
+        });
+    }
+
     public User convert(UserDTO dto) {
         var user = UserMapper.fromDTO(dto);
         return user;

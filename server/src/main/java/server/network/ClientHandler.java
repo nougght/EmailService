@@ -11,6 +11,8 @@ import server.model.Email;
 import server.model.User;
 import server.network.message.Message;
 import server.network.message.MessageDeserializer;
+import server.network.notification.NewEmailNotification;
+import server.network.notification.Notification;
 import server.network.request.*;
 import server.network.response.*;
 import server.services.AuthService;
@@ -21,28 +23,35 @@ import server.services.UserService;
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
+
+import static java.lang.System.in;
 
 public class ClientHandler implements Runnable {
 
     Socket socket;
     private BufferedReader sIn = null;
     private PrintWriter sOut = null;
-    final private AuthService authService;
-    final private EmailService emailService;
-    final private UserService userService;
-    final private ObjectMapper jsonMapper = new ObjectMapper();
-    final private MessageDeserializer deserializer = new MessageDeserializer();
+    private final AuthService authService;
+    private final EmailService emailService;
+    private final UserService userService;
+    private final ObjectMapper jsonMapper = new ObjectMapper();
+    private final MessageDeserializer deserializer = new MessageDeserializer();
+    private final BlockingQueue<Notification> notifications = new LinkedBlockingQueue<>();
+    private final ConnectionManager connectionManager;
+    private UUID userId;
 
-    final private HashMap<String, Object> handlers = new HashMap<>(Map.ofEntries(
 
-    ));
 
-    ClientHandler(Socket socket, AuthService authService, EmailService emailService, UserService userService) {
+    ClientHandler(Socket socket, AuthService authService, EmailService emailService, UserService userService, ConnectionManager connectionManager) {
         this.socket = socket;
         this.authService = authService;
         this.emailService = emailService;
         this.userService = userService;
+        this.connectionManager = connectionManager;
+
         SimpleModule module = new SimpleModule();
         module.addDeserializer(Message.class, new MessageDeserializer());
         jsonMapper.registerModule(new JavaTimeModule());
@@ -58,8 +67,26 @@ public class ClientHandler implements Runnable {
         }
     }
 
+
+    public void send(Notification ntf) {
+        notifications.offer(ntf);
+    }
+
     @Override
     public void run() {
+        new Thread(() -> {
+            while (true) {
+                try {
+                    var ntf = notifications.take();
+                    var jsonNotification = jsonMapper.writeValueAsString(ntf);
+                    sOut.println(jsonNotification);
+                    System.out.println("sent new notification " + jsonNotification);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+
         String message = "";
         while (true) {
             try {
@@ -79,6 +106,7 @@ public class ClientHandler implements Runnable {
 
             } catch (IOException i) {
                 System.out.println(i.toString());
+                connectionManager.removeHandler(userId, this);
                 return;
             }
         }
@@ -127,6 +155,7 @@ public class ClientHandler implements Runnable {
                     request.getRequestId(),
                     "success"
             ));
+            connectionManager.removeHandler(userId, this);
             sOut.println(json);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -209,6 +238,8 @@ public class ClientHandler implements Runnable {
                 authService.addRefreshToken(UUID.randomUUID().toString(), user.getUserId());
                 response.setAccessToken(authService.genAccessToken(user.getUserId()));
                 response.setRefreshToken(refreshToken);
+                userId = user.getUserId();
+                connectionManager.addClient(userId, this);
             }
             var json = jsonMapper.writeValueAsString(response);
             sOut.println(json);
@@ -235,6 +266,8 @@ public class ClientHandler implements Runnable {
                 authService.addRefreshToken(refreshToken, user.getUserId());
                 response.setAccessToken(authService.genAccessToken(user.getUserId()));
                 response.setRefreshToken(refreshToken);
+                userId = user.getUserId();
+                connectionManager.addClient(userId, this);
             }
             var json = jsonMapper.writeValueAsString(response);
             sOut.println(json);
@@ -257,6 +290,8 @@ public class ClientHandler implements Runnable {
             user = optionalUser.get();
             status = "success";
             accessToken = authService.genAccessToken(request.getUserId());
+            userId = user.getUserId();
+            connectionManager.addClient(userId, this);
         }
         try {
             var response = new RefreshResponse(request.getRequestId(),
@@ -291,6 +326,14 @@ public class ClientHandler implements Runnable {
                     status = "success";
                     email = optionalEmail.get();
                     // TODO send notification
+                    var handlers = connectionManager.get(email.getReceiverId());
+                    for (var h : handlers) {
+                        h.send(
+                                new NewEmailNotification(
+                                        EmailMapper.toDTO(email)
+                                )
+                        );                    }
+
                 }
             }
             var response = new SendEmailResponse(

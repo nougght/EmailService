@@ -1,22 +1,24 @@
 package client.network;
 
 import client.dto.EmailDTO;
+import client.model.Email;
 import client.network.message.Message;
 import client.network.message.MessageDeserializer;
+import client.network.notification.NewEmailNotification;
 import client.network.notification.Notification;
 import client.network.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.json.JSONObject;
 
 import javax.net.ssl.SSLSocket;
 import java.io.*;
-import java.net.Socket;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 // прослушивание запросов и ответов от сервера в отдельном потоке
 public class TcpListener extends Thread{
@@ -25,6 +27,7 @@ public class TcpListener extends Thread{
     private PrintWriter sOut = null;
     final private ObjectMapper jsonMapper = new ObjectMapper();
 
+    final private BlockingQueue<Notification> notifications = new LinkedBlockingQueue<>();
     final private ConcurrentHashMap<UUID, CompletableFuture<Response>> pendingResponses;
 
     TcpListener(SSLSocket socket, ConcurrentHashMap<UUID, CompletableFuture<Response>> responses)
@@ -46,6 +49,8 @@ public class TcpListener extends Thread{
             System.out.println(e.toString());
         }
     }
+
+    public BlockingQueue<Notification> getNotifications() {return notifications;}
 
     public void run()
     {
@@ -71,7 +76,10 @@ public class TcpListener extends Thread{
                 // иначе - это команда/сообщение от сервера
                 else
                 {
-                    handleServerMessage((Notification) msg);
+                    var ok = notifications.offer((Notification) msg);
+                    if (!ok) {
+                        System.out.println("Blocking queue error ");
+                    }
                 }
             }
 
@@ -122,10 +130,6 @@ public class TcpListener extends Thread{
         future.complete(response);
     }
 
-    public void handleServerMessage(Notification ntf)
-    {
-
-    }
 
     public void newEmailHandler(EmailDTO email)
     {

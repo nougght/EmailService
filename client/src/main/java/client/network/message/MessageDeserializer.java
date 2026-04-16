@@ -1,5 +1,6 @@
 package client.network.message;
 
+import client.network.notification.NewEmailNotification;
 import client.network.request.*;
 import client.network.response.*;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -34,6 +35,7 @@ public class MessageDeserializer extends StdDeserializer<Message> {
             case "RESPONSE:GetUser"   -> p.getCodec().treeToValue(node, GetUserResponse.class);
             case "RESPONSE:GetEmails"   -> p.getCodec().treeToValue(node, GetEmailsResponse.class);
             case "RESPONSE:SendEmail"   -> p.getCodec().treeToValue(node, SendEmailResponse.class);
+            case "NOTIFICATION:NewEmail"   -> p.getCodec().treeToValue(node, NewEmailNotification.class);
             default -> throw new JsonParseException(p, "Unknown type: " + kind + ":" + type);
         };
     }
