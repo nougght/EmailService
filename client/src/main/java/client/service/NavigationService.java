@@ -4,6 +4,7 @@ import client.EmailApplication;
 import client.view.*;
 import client.viewModel.*;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -27,6 +28,11 @@ public class NavigationService {
 
     private final Stage mainStage;
     private final ArrayList<Stage> windows = new ArrayList<>();
+    private final ChangeListener<Object> onNewEmailListener = (_, _, _) -> {
+        System.out.println("OnNewEmail Listener");
+        addNewEmailWindow();
+    };
+
     private StackPane rootPane;
     private SplitPane splitPane;
 
@@ -106,9 +112,7 @@ public class NavigationService {
             splitPane = controller.getSplitPane();
             if (controller != null) {
                 var vm = new MainViewModel(authService, emailService, sessionService);
-                vm.getOnNewEmail().addListener(_ -> {
-                    addNewEmailWindow();
-                });
+                vm.getOnNewEmail().addListener(onNewEmailListener);
                 vm.getOnOpenEmail().addListener( (ObservableValue<? extends UUID> obs, UUID old, UUID id) -> {
                     showEmailView(id);
                 });
@@ -147,6 +151,7 @@ public class NavigationService {
 
     public void addNewEmailWindow() {
         try {
+            System.out.println("addNewEmailWindow");
             Stage stage = new Stage();
             stage.initOwner(mainStage);
 

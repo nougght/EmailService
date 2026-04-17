@@ -18,8 +18,7 @@
                         </MenuBar>
                         <ToolBar prefHeight="40.0" prefWidth="200.0">
                           <items>
-                            <Button mnemonicParsing="false" text="Написать"
-                            onAction="#handleNewEmailClick"/>
+                            <Button mnemonicParsing="false" onAction="#handleNewEmailClick" text="Написать" />
                               <Button mnemonicParsing="false" text="Удалить" />
                               <Button mnemonicParsing="false" onAction="#handleLogoutClick" text="Выйти из аккаунта" />
                           </items>
@@ -36,12 +35,12 @@
                            </children></VBox>
                         <VBox maxWidth="1.7976931348623157E308" minWidth="100.0">
                            <children>
-                              <HBox prefHeight="100.0" prefWidth="200.0">
+                              <HBox>
                                  <children>
                                     <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleClick" prefHeight="25.0" prefWidth="71.0" text="Refresh" textAlignment="CENTER" />
                                  </children>
                               </HBox>
-                              <ListView fx:id="emailsList" />
+                              <ListView fx:id="emailsList" VBox.vgrow="ALWAYS" />
                            </children>
                         </VBox>
                         <Label fx:id="userLabel" alignment="TOP_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="100.0" text="Label" />
