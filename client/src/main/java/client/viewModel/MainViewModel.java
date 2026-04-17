@@ -12,9 +12,9 @@ import javafx.collections.ObservableList;
 import java.util.UUID;
 
 public class MainViewModel {
-    final private AuthService authService;
-    final private EmailService emailService;
-    final private SessionService sessionService;
+    private final AuthService authService;
+    private final EmailService emailService;
+    private final SessionService sessionService;
 
     public MainViewModel(AuthService authService, EmailService emailService, SessionService sessionService) {
         this.authService = authService;
@@ -24,9 +24,9 @@ public class MainViewModel {
         emails = emailService.getEmailsList();
     }
 
-    private ObjectProperty<Object> onLogout = new SimpleObjectProperty<>();
-    private ObjectProperty<UUID> onOpenEmail = new SimpleObjectProperty<>();
-    private ObjectProperty<Object> onNewEmail = new SimpleObjectProperty<>();
+    private final ObjectProperty<Object> onLogout = new SimpleObjectProperty<>();
+    private final ObjectProperty<UUID> onOpenEmail = new SimpleObjectProperty<>();
+    private final ObjectProperty<Object> onNewEmail = new SimpleObjectProperty<>();
 
     private ObjectProperty<User> currentUser;
     private ObservableList<Email> emails;
@@ -67,6 +67,8 @@ public class MainViewModel {
     }
 
     public void onNewEmailClicked() {
+        System.out.println("onNewEmailClicked");
+
         onNewEmail.set(new Object());
     }
 }
