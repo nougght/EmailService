@@ -230,7 +230,7 @@ public class TcpClient extends Thread {
         try {
             var request = new SendEmailRequest(
                     emailSending.getSenderId(),
-                    emailSending.getReceiverUsername(),
+                    emailSending.getRecipientUsernames(),
                     emailSending.getSubject(),
                     emailSending.getBody()
             );

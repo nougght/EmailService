@@ -1,10 +1,11 @@
 package client.network.request;
 
+import java.util.List;
 import java.util.UUID;
 
 public class SendEmailRequest extends Request {
     private UUID senderId;
-    private String receiverUsername;
+    private List<String> recipientUsernames;
 
     private String subject;
     private String body;
@@ -15,10 +16,10 @@ public class SendEmailRequest extends Request {
         super();
     }
 
-    public SendEmailRequest(UUID senderId, String receiverUsername, String subject, String body) {
+    public SendEmailRequest(UUID senderId, List<String> recipientUsernames, String subject, String body) {
         super("SendEmail");
         this.senderId = senderId;
-        this.receiverUsername = receiverUsername;
+        this.recipientUsernames = recipientUsernames;
         this.subject = subject;
         this.body = body;
 
@@ -28,8 +29,8 @@ public class SendEmailRequest extends Request {
         return senderId;
     }
 
-    public String getReceiverUsername() {
-        return receiverUsername;
+    public List<String> getRecipientUsernames() {
+        return recipientUsernames;
     }
 
     public String getSubject() {
@@ -44,8 +45,8 @@ public class SendEmailRequest extends Request {
         this.senderId = senderId;
     }
 
-    public void setReceiverUsername(String receiverUsername) {
-        this.receiverUsername = receiverUsername;
+    public void setRecipientUsernames(List<String> recipientUsernames) {
+        this.recipientUsernames = recipientUsernames;
     }
 
     public void setSubject(String subject) {

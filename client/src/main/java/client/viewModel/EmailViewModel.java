@@ -1,12 +1,15 @@
 package client.viewModel;
 
 import client.model.Email;
+import client.model.User;
 import client.service.EmailService;
 import client.service.SessionService;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class EmailViewModel {
     private final EmailService emailService;
@@ -16,7 +19,7 @@ public class EmailViewModel {
 
     private StringProperty subject = new SimpleStringProperty();
     private StringProperty sender = new SimpleStringProperty();
-    private StringProperty receiver = new SimpleStringProperty();
+    private ObservableList<User> recipients = FXCollections.observableArrayList();
     private StringProperty body = new SimpleStringProperty();
 
     private ObjectProperty<Object> onReply = new SimpleObjectProperty<>();
@@ -37,7 +40,8 @@ public class EmailViewModel {
         this.email = email;
         subject.set(email.getSubject());
         sender.set(email.getSender().getUsername());
-        receiver.set(email.getReceiver().getUsername());
+        // TODO
+//        recipients.set(email.getRecipients());
         body.set(email.getBody());
     }
 
@@ -49,8 +53,8 @@ public class EmailViewModel {
         return sender;
     }
 
-    public StringProperty getReceiver() {
-        return receiver;
+    public ObservableList<User> getRecipients() {
+        return recipients;
     }
 
     public StringProperty getBody() {

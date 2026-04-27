@@ -34,7 +34,8 @@
                                       <Label text="Кому" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                       <Label text="От кого" GridPane.columnIndex="1" />
                                       <Label fx:id="senderLabel" text="Отправитель" GridPane.columnIndex="2" />
-                                      <Label fx:id="receiverLabel" text="Получатель" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <ListView orientation="HORIZONTAL" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1"
+                                        fx:id="recipientsList"/>
                                   </children>
                               </GridPane>
                               <AnchorPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
