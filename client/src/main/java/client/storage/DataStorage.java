@@ -1,25 +1,19 @@
 package client.storage;
 
-import client.dto.EmailDTO;
-import client.dto.UserDTO;
 import client.model.Email;
 import client.model.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 // хранилище, предоставляющее доступ к данным, но без логики обработки
 public class DataStorage {
     final private ObservableList<Email> emails = FXCollections.observableArrayList();
-    final private ObservableList<User> users = FXCollections.observableArrayList();
+    final private Map<UUID, User> users = new HashMap<>();
 
-
-//    emails
+//      emails
 
     public Optional<Email> getEmailByEmailId(UUID emailId) {
         return emails.stream().filter(e -> e.getEmailId() == emailId).findFirst();
@@ -30,37 +24,46 @@ public class DataStorage {
                 collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public ObservableList<Email> getAllEmails()
-    {
+    public ObservableList<Email> getAllEmails() {
         return emails;
     }
 
-    public ArrayList<Email> getEmailsByReceiverId(UUID receiverId) {
-        return emails.stream().filter(e -> e.getReceiverId() == receiverId).
-                collect(Collectors.toCollection(ArrayList::new));
+//    public ArrayList<Email> getEmailsByReceiverId(UUID receiverId) {
+//        return emails.stream().filter(e -> e.getReceiverId() == receiverId).
+//                collect(Collectors.toCollection(ArrayList::new));
+//    }
+
+    public void setAllEmails(ArrayList<Email> emails) {
+        this.emails.setAll(emails);
     }
 
 //    users
 
     public Optional<User> getUserByUserId(UUID userId) {
-        return users.stream().filter(u -> u.getUserId().equals(userId)).findFirst();
+        return Optional.ofNullable(users.get(userId));
     }
 
-    public Optional<User> getUserByUsername(String username)
-    {
-        return users.stream().filter(u -> u.getUsername().equals(username)).findFirst();
+//    public Optional<User> getUserByUsername(String username)
+//    {
+//        return users.stream().filter(u -> u.getUsername().equals(username)).findFirst();
+//    }
+
+
+    public void addUser(User user) {
+        users.put(user.getUserId(), user);
     }
 
-    public void setAllEmails(ArrayList<Email> emails)
-    {
-        this.emails.setAll(emails);
+
+    public void addUsers(Map<UUID, User> users){
+        this.users.putAll(users);
     }
 
-    public void addUser(User user){
-        users.add(user);
+    public boolean containsUserWithId(UUID id){
+        return users.containsKey(id);
     }
 
-    public void addEmail(Email email){
+
+    public void addEmail(Email email) {
         emails.add(email);
     }
 }

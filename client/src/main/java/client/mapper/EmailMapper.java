@@ -9,7 +9,7 @@ public class EmailMapper {
         return new EmailDTO(
                 email.getEmailId(),
                 email.getSenderId(),
-                email.getReceiverId(),
+                email.getRecipientIds(),
                 email.getSubject(),
                 email.getBody(),
                 email.getSentAt()
@@ -20,7 +20,7 @@ public class EmailMapper {
         return new Email(
                 dto.getEmailId(),
                 dto.getSenderId(),
-                dto.getReceiverId(),
+                dto.getRecipientIds(),
                 dto.getSubject(),
                 dto.getBody(),
                 dto.getSentAt(),

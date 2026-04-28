@@ -1,4 +1,5 @@
 package client.dto;
+import java.util.List;
 import java.util.UUID;
 import java.time.OffsetDateTime;
 
@@ -7,18 +8,18 @@ import java.time.OffsetDateTime;
 public class EmailDTO {
     private UUID emailId;
     private UUID senderId;
-    private UUID receiverId;
+    private List<UUID> recipientIds;
 
     private String subject;
     private String body;
     private OffsetDateTime sentAt;
 
     public EmailDTO(){}
-    public EmailDTO(UUID email_id, UUID sender_id, UUID receiver_id,
+    public EmailDTO(UUID email_id, UUID sender_id, List<UUID> recipientIds,
                     String subject, String body, OffsetDateTime sent_at) {
         this.emailId = email_id;
         this.senderId = sender_id;
-        this.receiverId = receiver_id;
+        this.recipientIds = recipientIds;
         this.subject = subject;
         this.body = body;
         this.sentAt = sent_at;
@@ -32,8 +33,8 @@ public class EmailDTO {
         return senderId;
     }
 
-    public UUID getReceiverId() {
-        return receiverId;
+    public List<UUID> getRecipientIds() {
+        return recipientIds;
     }
 
     public String getSubject() {
@@ -56,8 +57,8 @@ public class EmailDTO {
         this.senderId = senderId;
     }
 
-    public void setReceiverId(UUID receiverId) {
-        this.receiverId = receiverId;
+    public void setRecipientIds(List<UUID> recipientIds) {
+        this.recipientIds = recipientIds;
     }
 
     public void setSubject(String subject) {

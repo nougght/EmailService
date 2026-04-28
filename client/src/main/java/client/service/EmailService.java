@@ -1,10 +1,13 @@
 package client.service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import client.dto.EmailDTO;
 import client.dto.UserDTO;
@@ -75,22 +78,49 @@ public class EmailService {
                 return;
             userId = user.getUserId();
         }
-        tcpClient.requestAllUserEmails(userId).thenCompose(lst -> {
-                    // to do: ограничить параллельную работу convert из-за возможной перегрузки
-                    var emails = lst.stream().map(e -> convert(e)).collect(Collectors.toCollection(ArrayList::new));
-                    return CompletableFuture.allOf(emails.toArray(new CompletableFuture[0])).
-                            thenApply(
-                                    v -> {
-                                        return emails.stream().map(e -> e.join()).collect(Collectors.toCollection(ArrayList::new));
+        tcpClient.requestAllUserEmails(userId).thenCompose(dtos -> {
+            List<UUID> userIds = dtos.stream().flatMap(dto -> {
+                return Stream.<UUID>concat(Stream.of(dto.getSenderId()), dto.getRecipientIds().stream());
+            }).collect(Collectors.toCollection(ArrayList::new));
 
-                                    }
-                            );
-                }
-        ).thenAccept(emails -> {
+            return this.loadUsers(userIds).thenApply(_ -> {
+                return dtos.stream().map(this::convert).collect(Collectors.toCollection(ArrayList::new));
+            });
+        }).thenAccept(emails -> {
             Platform.runLater(() -> storage.setAllEmails(emails));
         });
+
+//                .thenCompose(lst -> {
+//                    // to do: ограничить параллельную работу convert из-за возможной перегрузки
+//                    var emails = lst.stream().map(e -> convert(e)).collect(Collectors.toCollection(ArrayList::new));
+//                    return CompletableFuture.allOf(emails.toArray(new CompletableFuture[0])).
+//                            thenApply(
+//                                    v -> {
+//                                        return emails.stream().map(e -> e.join()).collect(Collectors.toCollection(ArrayList::new));
+//
+//                                    }
+//                            );
+//                }
+//        )
+
     }
 
+    public CompletableFuture<Integer> loadUsers(List<UUID> ids) {
+        if (ids.isEmpty()) return CompletableFuture.completedFuture(0);
+        for (var i = 0; i < ids.size(); ) {
+            if (!storage.containsUserWithId(ids.get(i))) {
+                ids.remove(i);
+            } else {
+                i++;
+            }
+        }
+        return tcpClient.requestUsersByIds(ids).thenApply(users -> {
+            storage.addUsers(
+                    users.values().stream().map(this::convert).collect(Collectors.toMap(User::getUserId, (val) -> val))
+            );
+            return users.size();
+        });
+    }
 
 //    public CompletableFuture<ArrayList<Email>> loadUserEmails(UUID userId) {
 //
@@ -107,26 +137,25 @@ public class EmailService {
 //    }
 
     public CompletableFuture<Optional<Email>> sendEmail(EmailSending email) {
-        return tcpClient.requestSendEmail(email).thenCompose(dto -> {
-                    // to do: ограничить параллельную работу convert из-за возможной перегрузки
-                    if (dto.isEmpty())
-                        return CompletableFuture.completedFuture(Optional.<Email>empty());
-                    return convert(dto.get()).thenApply(e -> {
-                        Platform.runLater(() -> storage.addEmail(e));
-                        return Optional.of(e);
-
-                    });
-                }
-        );
+        return tcpClient.requestSendEmail(email).thenCompose(optionalDto -> {
+            // to do: ограничить параллельную работу convert из-за возможной перегрузки
+            if (optionalDto.isEmpty())
+                return CompletableFuture.completedFuture(Optional.<Email>empty());
+            var dto = optionalDto.get();
+            List<UUID> userIds = Stream.<UUID>concat(Stream.of(dto.getSenderId()), dto.getRecipientIds().stream()).collect(Collectors.toCollection(ArrayList::new));
+            return loadUsers(userIds).thenApply(_ -> {
+                var eml = convert(dto);
+                Platform.runLater(() -> storage.addEmail(eml));
+                return Optional.of(eml);
+            });
+        });
     }
 
-    public void addEmail(EmailDTO dto){
-        convert(dto).thenAccept(e -> {
-            Platform.runLater(() -> {
-                storage.addEmail(e);
-            });
-
+    public void addEmail(EmailDTO dto) {
+        Platform.runLater(() -> {
+            storage.addEmail(convert(dto));
         });
+
     }
 
     public User convert(UserDTO dto) {
@@ -134,18 +163,33 @@ public class EmailService {
         return user;
     }
 
-    public CompletableFuture<Email> convert(EmailDTO dto) {
-        var senderFuture = getUserByUserId(dto.getSenderId());
-        var receiverFuture = getUserByUserId(dto.getReceiverId());
-        // дожидаемся завершения всех асинхронных функций
-        return CompletableFuture.allOf(senderFuture, receiverFuture).thenApply(v -> {
-            var email = EmailMapper.fromDTO(dto);
-            email.setSender(senderFuture.join().get());
-            email.setReceiver(receiverFuture.join().get());
-            // возвращаем полученные данные
-            return email;
-        });
+    public Email convert(EmailDTO dto) {
+        var email = EmailMapper.fromDTO(dto);
+        var optionalSender = storage.getUserByUserId(email.getSenderId());
+        email.setSender(optionalSender.orElseGet(User::placeholder));
+
+        Optional<User> optionalRecipient;
+        List<User> recipients = new ArrayList<>();
+        for (var id : dto.getRecipientIds()) {
+            optionalRecipient = storage.getUserByUserId(id);
+            recipients.add(optionalRecipient.orElseGet(User::placeholder));
+        }
+        email.setRecipients(recipients);
+        // возвращаем полученные данные
+        return email;
     }
+//        public CompletableFuture<Email> convert (EmailDTO dto){
+//            var senderFuture = getUserByUserId(dto.getSenderId());
+//            var receiverFuture = getUserByUserId(dto.getReceiverId());
+//            // дожидаемся завершения всех асинхронных функций
+//            return CompletableFuture.allOf(senderFuture, receiverFuture).thenApply(v -> {
+//                var email = EmailMapper.fromDTO(dto);
+//                email.setSender(senderFuture.join().get());
+//                email.setRecipients(receiverFuture.join().get());
+//                // возвращаем полученные данные
+//                return email;
+//            });
+//        }
 
 
 }

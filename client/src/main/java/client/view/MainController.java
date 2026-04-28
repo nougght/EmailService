@@ -14,8 +14,6 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 
-import java.util.UUID;
-
 public class MainController {
 
     private MainViewModel viewModel;
@@ -59,7 +57,7 @@ public class MainController {
                 } else {
                     subject.setText(email.getSubject());
                     from.setText(email.getSender().getUsername());
-                    to.setText(email.getReceiver().getUsername());
+                    to.setText(email.getRecipients().getFirst().getUsername());
 //                    onMouseClickedProperty().addListener( _ -> {
 //                        viewModel.onEmailClicked(email.getEmailId());
 //                    });

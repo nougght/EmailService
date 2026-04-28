@@ -41,11 +41,11 @@ public class EmailFormViewModel {
         });
     }
 
-    public void setEmail(Email email) {
-        this.subject.set(email.getSubject());
-        this.receiver.set(email.getReceiver().getUsername());
-        this.body.set(email.getBody());
-    }
+//    public void setEmail(Email email) {
+//        this.subject.set(email.getSubject());
+//        this.receiver.set(email.getRecipients().getUsername());
+//        this.body.set(email.getBody());
+//    }
 
     public ObjectProperty<Object> getOnEmailSent(){
         return onEmailSent;

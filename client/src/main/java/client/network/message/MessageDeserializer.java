@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 
+
 public class MessageDeserializer extends StdDeserializer<Message> {
     public MessageDeserializer() { super(Message.class); }
 
@@ -28,6 +29,8 @@ public class MessageDeserializer extends StdDeserializer<Message> {
             case "REQUEST:GetUser"  -> p.getCodec().treeToValue(node, GetUserRequest.class);
             case "REQUEST:GetEmails"  -> p.getCodec().treeToValue(node, GetEmailsRequest.class);
             case "REQUEST:SendEmail"    -> p.getCodec().treeToValue(node, SendEmailRequest.class);
+            case "REQUEST:GetUsers"    -> p.getCodec().treeToValue(node, GetUsersResponse.class);
+
             case "RESPONSE:Registration"   -> p.getCodec().treeToValue(node, RegistrationResponse.class);
             case "RESPONSE:Refresh" -> p.getCodec().treeToValue(node, RefreshResponse.class);
             case "RESPONSE:Login"   -> p.getCodec().treeToValue(node, LoginResponse.class);
@@ -35,6 +38,8 @@ public class MessageDeserializer extends StdDeserializer<Message> {
             case "RESPONSE:GetUser"   -> p.getCodec().treeToValue(node, GetUserResponse.class);
             case "RESPONSE:GetEmails"   -> p.getCodec().treeToValue(node, GetEmailsResponse.class);
             case "RESPONSE:SendEmail"   -> p.getCodec().treeToValue(node, SendEmailResponse.class);
+            case "RESPONSE:GetUsers"   -> p.getCodec().treeToValue(node, GetUsersResponse.class);
+
             case "NOTIFICATION:NewEmail"   -> p.getCodec().treeToValue(node, NewEmailNotification.class);
             default -> throw new JsonParseException(p, "Unknown type: " + kind + ":" + type);
         };
