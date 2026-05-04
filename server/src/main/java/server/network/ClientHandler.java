@@ -8,13 +8,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import server.mapper.EmailMapper;
 import server.mapper.UserMapper;
 import server.model.Email;
+import server.model.EmailRecipient;
 import server.model.User;
-import server.network.message.Message;
-import server.network.message.MessageDeserializer;
-import server.network.notification.NewEmailNotification;
-import server.network.notification.Notification;
-import server.network.request.*;
-import server.network.response.*;
+import common.network.message.Message;
+import common.network.message.MessageDeserializer;
+import common.network.notification.NewEmailNotification;
+import common.network.notification.Notification;
+import common.network.request.*;
+import common.network.response.*;
 import server.services.AuthService;
 import server.services.EmailService;
 import server.services.UserService;
@@ -26,8 +27,6 @@ import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
-
-import static java.lang.System.in;
 
 public class ClientHandler implements Runnable {
 
@@ -42,7 +41,6 @@ public class ClientHandler implements Runnable {
     private final BlockingQueue<Notification> notifications = new LinkedBlockingQueue<>();
     private final ConnectionManager connectionManager;
     private UUID userId;
-
 
 
     ClientHandler(Socket socket, AuthService authService, EmailService emailService, UserService userService, ConnectionManager connectionManager) {
@@ -114,7 +112,6 @@ public class ClientHandler implements Runnable {
 
     public void handleRequest(Request request) {
         try {
-
             switch (request.getType()) {
                 case "Registration":
                     registrationHandler((RegistrationRequest) request);
@@ -133,6 +130,9 @@ public class ClientHandler implements Runnable {
                     break;
                 case "GetUser":
                     getUserHandler((GetUserRequest) request);
+                    break;
+                case "GetUsers":
+                    getUsersHandler((GetUsersRequest) request);
                     break;
                 case "SendEmail":
                     sendEmailHandler((SendEmailRequest) request);
@@ -217,6 +217,23 @@ public class ClientHandler implements Runnable {
 
     }
 
+    public void getUsersHandler(GetUsersRequest request) {
+//        проверка токена доступа
+        UUID userId = authService.verifyAccessToken(request.getAccessToken());
+        if (userId == null)
+            return;
+        try {
+            var users = userService.getUsersByIds(request.getUserIds());
+            var jsonResponse = jsonMapper.writeValueAsString(new GetUsersResponse(
+                    request.getRequestId(), users.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                    entry -> UserMapper.toDTO(entry.getValue()))), "success"
+            ));
+            sOut.println(jsonResponse);
+            System.out.println("response sent");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public void registrationHandler(RegistrationRequest request) {
         var result = authService.register(request.getUsername(), request.getPassword());
@@ -308,34 +325,44 @@ public class ClientHandler implements Runnable {
 
     public void sendEmailHandler(SendEmailRequest request) {
         try {
-            var status = "fail";
+            var status = "fale";
             Email email = null;
-            var optionalReceiver = userService.getUserByUsername(request.getReceiverUsername());
-            if (optionalReceiver.isPresent()) {
-                var optionalEmail = emailService.addEmail(new Email(
-                        null,
-                        request.getSenderId(),
-                        optionalReceiver.get().getUserId(),
-                        request.getSubject(),
-                        request.getBody(),
-                        null,
-                        null,
-                        null
-                ));
-                if (optionalEmail.isPresent()) {
-                    status = "success";
-                    email = optionalEmail.get();
-                    // TODO send notification
-                    var handlers = connectionManager.get(email.getReceiverId());
-                    for (var h : handlers) {
-                        h.send(
-                                new NewEmailNotification(
-                                        EmailMapper.toDTO(email)
-                                )
-                        );                    }
 
-                }
+//            var recipients = userService.getUsersByUsernames(request.getRecipientUsernames())
+//                    .values().stream().map(User::getUserId).collect(Collectors.toCollection(ArrayList::new));
+            if (request.getSenderId() == null) {
+                sOut.println(jsonMapper.writeValueAsString(new SendEmailResponse(
+                        request.getRequestId(),
+                        "invalid",
+                        null
+                )));
             }
+            var recipients = request.getRecipientUsernames().stream().map(u -> new EmailRecipient(null, null, u)).toList();
+            var optionalEmail = emailService.addEmail(new Email(
+                    null,
+                    request.getSenderId(),
+                    null,
+                    request.getSubject(),
+                    request.getBody(),
+                    null,
+                    null,
+                    recipients
+
+            ));
+            if (optionalEmail.isPresent()) {
+                status = "success";
+                email = optionalEmail.get();
+                final var e = email;
+                var handlers = connectionManager.getClientsByIds(email.getRecipients().stream().map(r -> {
+                    return r.getUserId().orElse(null);
+                }).toList());
+                handlers.forEach(lst -> lst.forEach(h -> {
+                    h.send(new NewEmailNotification(
+                            EmailMapper.toDTO(e)
+                    ));
+                }));
+            }
+
             var response = new SendEmailResponse(
                     request.getRequestId(),
                     status,

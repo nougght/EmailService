@@ -1,7 +1,7 @@
 package client.mapper;
 
-import client.dto.UserDTO;
 import client.model.User;
+import common.dto.UserDTO;
 
 public class UserMapper {
     public static UserDTO toDTO(User user)

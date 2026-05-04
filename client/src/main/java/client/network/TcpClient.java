@@ -1,16 +1,18 @@
 package client.network;
 
-import client.dto.EmailDTO;
-import client.dto.UserDTO;
+import common.dto.EmailDTO;
+import common.dto.UserDTO;
 import client.model.AuthResult;
 import client.model.Email;
 import client.model.EmailSending;
-import client.network.notification.Notification;
-import client.network.request.*;
-import client.network.response.*;
+import common.network.notification.Notification;
+import common.network.request.*;
+import common.network.request.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import common.network.response.*;
+import common.network.request.*;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -226,6 +228,7 @@ public class TcpClient extends Thread {
         try {
             var request = new GetUsersRequest(ids);
 
+            request.setAccessToken(accessToken);
             var jsonRequest = jsonMapper.writeValueAsString(request);
             CompletableFuture<Response> future = new CompletableFuture<>();
 

@@ -1,7 +1,7 @@
 package server.mapper;
 
 
-import server.dto.UserDTO;
+import common.dto.UserDTO;
 import server.model.User;
 
 public class UserMapper {

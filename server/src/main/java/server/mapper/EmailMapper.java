@@ -1,9 +1,8 @@
 package server.mapper;
 
-import server.dto.EmailDTO;
+import common.dto.EmailDTO;
+import server.mapper.EmailRecipientMapper;
 import server.model.Email;
-
-import java.util.UUID;
 
 public class EmailMapper {
 
@@ -11,8 +10,8 @@ public class EmailMapper {
         if (email == null) return null;
         return new EmailDTO(
                 email.getEmailId(),
-                email.getSenderId(),
-                email.getReceiverId(),
+                email.getSenderId().orElse(null),
+                email.getRecipients().stream().map(EmailRecipientMapper::toDto).toList(),
                 email.getSubject(),
                 email.getBody(),
                 email.getSentAt()
@@ -22,12 +21,12 @@ public class EmailMapper {
         return new Email(
                 dto.getEmailId(),
                 dto.getSenderId(),
-                dto.getReceiverId(),
+                dto.getSenderUsername(),
                 dto.getSubject(),
                 dto.getBody(),
                 dto.getSentAt(),
                 null,
-                null
+                dto.getRecipients().stream().map(EmailRecipientMapper::fromDto).toList()
         );
     }
 }

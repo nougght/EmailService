@@ -9,8 +9,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import client.dto.EmailDTO;
-import client.dto.UserDTO;
+import common.dto.EmailDTO;
+import common.dto.EmailRecipientDTO;
+import common.dto.UserDTO;
 import client.mapper.EmailMapper;
 import client.mapper.UserMapper;
 import client.model.Email;
@@ -31,12 +32,10 @@ public class EmailService {
         this.sessionService = sessionService;
         this.storage = storage;
 
-
         sessionService.addListener(s -> {
             //temp: нужно исключить возможность гонки данных, реализовать возможность отмены задачи
-            loadUserEmails(sessionService.getCurrentUser().getValue().getUserId());
+            loadUserEmails(null);
         });
-
     }
 
     public CompletableFuture<Optional<User>> getUserByUserId(UUID userId) {
@@ -78,9 +77,10 @@ public class EmailService {
                 return;
             userId = user.getUserId();
         }
+
         tcpClient.requestAllUserEmails(userId).thenCompose(dtos -> {
             List<UUID> userIds = dtos.stream().flatMap(dto -> {
-                return Stream.<UUID>concat(Stream.of(dto.getSenderId()), dto.getRecipientIds().stream());
+                return Stream.<UUID>concat(Stream.of(dto.getSenderId()), dto.getRecipients().stream().map(r -> r.getUserId()));
             }).collect(Collectors.toCollection(ArrayList::new));
 
             return this.loadUsers(userIds).thenApply(_ -> {
@@ -142,7 +142,7 @@ public class EmailService {
             if (optionalDto.isEmpty())
                 return CompletableFuture.completedFuture(Optional.<Email>empty());
             var dto = optionalDto.get();
-            List<UUID> userIds = Stream.<UUID>concat(Stream.of(dto.getSenderId()), dto.getRecipientIds().stream()).collect(Collectors.toCollection(ArrayList::new));
+            List<UUID> userIds = Stream.<UUID>concat(Stream.of(dto.getSenderId()), dto.getRecipients().stream().map(EmailRecipientDTO::getUserId)).collect(Collectors.toCollection(ArrayList::new));
             return loadUsers(userIds).thenApply(_ -> {
                 var eml = convert(dto);
                 Platform.runLater(() -> storage.addEmail(eml));
@@ -167,14 +167,14 @@ public class EmailService {
         var email = EmailMapper.fromDTO(dto);
         var optionalSender = storage.getUserByUserId(email.getSenderId());
         email.setSender(optionalSender.orElseGet(User::placeholder));
-
-        Optional<User> optionalRecipient;
-        List<User> recipients = new ArrayList<>();
-        for (var id : dto.getRecipientIds()) {
-            optionalRecipient = storage.getUserByUserId(id);
-            recipients.add(optionalRecipient.orElseGet(User::placeholder));
-        }
-        email.setRecipients(recipients);
+//
+//        Optional<User> optionalRecipient;
+//        List<User> recipients = new ArrayList<>();
+//        for (var r : dto.getRecipients()) {
+//            optionalRecipient = storage.getUserByUserId(id);
+//            recipients.add(optionalRecipient.orElseGet(User::placeholder));
+//        }
+//        email.setRecipients(recipients);
         // возвращаем полученные данные
         return email;
     }

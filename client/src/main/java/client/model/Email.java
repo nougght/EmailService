@@ -1,5 +1,7 @@
 package client.model;
 
+import common.dto.EmailRecipientDTO;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -7,23 +9,22 @@ import java.util.UUID;
 public class Email {
     private UUID emailId;
     private UUID senderId;
-    private List<UUID> recipientIds;
-
+    private String senderUsername;
     private String subject;
     private String body;
     private OffsetDateTime sentAt;
 
     private User sender;
-    private List<User> recipients;
+    private List<EmailRecipientDTO> recipients;
 
     private String type;
 
-    public Email(UUID email_id, UUID sender_id, List<UUID> recipientIds,
-                 String subject, String body, OffsetDateTime sent_at, User sender, List<User> recipients,
+    public Email(UUID email_id, UUID sender_id, String senderUsername,
+                 String subject, String body, OffsetDateTime sent_at, User sender, List<EmailRecipientDTO> recipients,
                  String type) {
         this.emailId = email_id;
         this.senderId = sender_id;
-        this.recipientIds = recipientIds;
+        this.senderUsername = senderUsername;
         this.subject = subject;
         this.body = body;
         this.sentAt = sent_at;
@@ -40,8 +41,8 @@ public class Email {
         return senderId;
     }
 
-    public List<UUID> getRecipientIds() {
-        return recipientIds;
+    public String getSenderUsername() {
+        return senderUsername;
     }
 
     public String getSubject() {
@@ -60,7 +61,7 @@ public class Email {
         return sender;
     }
 
-    public List<User> getRecipients() {
+    public List<EmailRecipientDTO> getRecipients() {
         return recipients;
     }
 
@@ -72,14 +73,14 @@ public class Email {
         this.sender = sender;
     }
 
-    public void setRecipients(List<User> recipients) {
+    public void setRecipients(List<EmailRecipientDTO> recipients) {
         this.recipients = recipients;
     }
 
     public void setSenderId(UUID senderId) {this.senderId = senderId;}
 
-    public void setRecipientIds(List<UUID> recipientIds) {
-        this.recipientIds = recipientIds;
+    public void setSenderUsername(String senderUsername) {
+        this.senderUsername = senderUsername;
     }
 
     public Boolean isInbox() {

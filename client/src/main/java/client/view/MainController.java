@@ -49,6 +49,7 @@ public class MainController {
 
             @Override
             protected void updateItem(Email email, boolean empty) {
+                System.out.println("Update email item:" + email);
                 super.updateItem(email, empty);
 
 

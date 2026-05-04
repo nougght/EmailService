@@ -3,8 +3,7 @@ package server.repositories;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import server.database.DatabaseManager;
 import server.model.User;
@@ -78,6 +77,58 @@ public class UserRepository {
             System.out.println("SQLException " + e.toString());
         }
         return Optional.empty();
+    }
+
+    public Map<UUID, User> getUsersByIds(List<UUID> userIds) {
+        try {
+            var con = DatabaseManager.getConnection();
+
+            var st = con.prepareStatement("SELECT * FROM users WHERE users.user_id = ANY(?)");
+            st.setArray(1, con.createArrayOf("UUID", userIds.toArray()));
+
+            var rows = st.executeQuery();
+
+            Map<UUID, User> result = new HashMap<>();
+            while (rows.next()) {
+                var userId = rows.getObject("user_id", UUID.class);
+                result.put(userId, new User(
+                        userId,
+                        rows.getString("username"),
+                        rows.getString("password_hash"),
+                        rows.getString("email"),
+                        rows.getObject("created_at", OffsetDateTime.class)
+                ));
+            }
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Map<String, User> getUsersByUsernames(List<String> usernames) {
+        try {
+            var con = DatabaseManager.getConnection();
+
+            var st = con.prepareStatement("SELECT * FROM users WHERE users.username = ANY(?)");
+            st.setArray(1, con.createArrayOf("VARCHAR", usernames.toArray()));
+
+            var rows = st.executeQuery();
+
+            Map<String, User> result = new HashMap<>();
+            while (rows.next()) {
+                var username = rows.getString("username");
+                result.put(username, new User(
+                        rows.getObject("user_id", UUID.class),
+                        username,
+                        rows.getString("password_hash"),
+                        rows.getString("email"),
+                        rows.getObject("created_at", OffsetDateTime.class)
+                ));
+            }
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void addUser(User user) {

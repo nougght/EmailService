@@ -4,6 +4,7 @@ import client.model.Email;
 import client.model.User;
 import client.service.EmailService;
 import client.service.SessionService;
+import common.dto.EmailRecipientDTO;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -19,7 +20,7 @@ public class EmailViewModel {
 
     private StringProperty subject = new SimpleStringProperty();
     private StringProperty sender = new SimpleStringProperty();
-    private ObservableList<User> recipients = FXCollections.observableArrayList();
+    private ObservableList<EmailRecipientDTO> recipients = FXCollections.observableArrayList();
     private StringProperty body = new SimpleStringProperty();
 
     private ObjectProperty<Object> onReply = new SimpleObjectProperty<>();
@@ -40,8 +41,7 @@ public class EmailViewModel {
         this.email = email;
         subject.set(email.getSubject());
         sender.set(email.getSender().getUsername());
-        // TODO
-//        recipients.set(email.getRecipients());
+        recipients.addAll(email.getRecipients());
         body.set(email.getBody());
     }
 
@@ -53,7 +53,7 @@ public class EmailViewModel {
         return sender;
     }
 
-    public ObservableList<User> getRecipients() {
+    public ObservableList<EmailRecipientDTO> getRecipients() {
         return recipients;
     }
 

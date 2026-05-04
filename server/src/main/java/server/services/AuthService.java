@@ -88,6 +88,9 @@ public class AuthService {
     }
 
     public UUID verifyAccessToken(String token) {
+        if (token == null) {
+            throw new RuntimeException("Access token missing");
+        }
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(jwtSecretKey)

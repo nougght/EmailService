@@ -1,6 +1,7 @@
 package client.view;
 
 import client.viewModel.EmailViewModel;
+import common.dto.EmailRecipientDTO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -23,7 +24,7 @@ public class EmailController {
         bodyLabel.textProperty().bind(viewModel.getBody());
         recipientsList.setItems(viewModel.getRecipients());
 
-        recipientsList.setCellFactory(lv -> new ListCell<String>() {
+        recipientsList.setCellFactory(lv -> new ListCell<EmailRecipientDTO>() {
             private final HBox row = new HBox();
             private final Label username = new Label();
             {
@@ -37,12 +38,12 @@ public class EmailController {
             }
 
             @Override
-            protected void updateItem(String username, boolean empty){
-                super.updateItem(username, empty);
-                if (empty || username == null) {
+            protected void updateItem(EmailRecipientDTO recipient, boolean empty){
+                super.updateItem(recipient, empty);
+                if (empty || recipient == null) {
                     setGraphic(null);
                 } else {
-                    this.username.setText(username);
+                    this.username.setText(recipient.getUsername());
                     setGraphic(row);
                 }
             }
