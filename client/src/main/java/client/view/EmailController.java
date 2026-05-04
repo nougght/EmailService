@@ -1,13 +1,16 @@
 package client.view;
 
 import client.viewModel.EmailViewModel;
-import javafx.beans.binding.Bindings;
+import common.dto.EmailRecipientDTO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import  javafx.scene.control.ListView;
 import javafx.scene.control.Button;
-
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Font;
 
 
 public class EmailController {
@@ -18,9 +21,33 @@ public class EmailController {
 
         subjectLabel.textProperty().bind(viewModel.getSubject());
         senderLabel.textProperty().bind(viewModel.getSender());
-        receiverLabel.textProperty().bind(viewModel.getReceiver());
         bodyLabel.textProperty().bind(viewModel.getBody());
+        recipientsList.setItems(viewModel.getRecipients());
 
+        recipientsList.setCellFactory(lv -> new ListCell<EmailRecipientDTO>() {
+            private final HBox row = new HBox();
+            private final Label username = new Label();
+            {
+                row.getChildren().addAll(username);
+                username.setFont(new Font(15));
+                row.setPadding(new Insets(5, 5, 5, 5));
+                row.setStyle("""
+                    -fx-border-color: black;
+                    -fx-border-width: 2;
+                """);
+            }
+
+            @Override
+            protected void updateItem(EmailRecipientDTO recipient, boolean empty){
+                super.updateItem(recipient, empty);
+                if (empty || recipient == null) {
+                    setGraphic(null);
+                } else {
+                    this.username.setText(recipient.getUsername());
+                    setGraphic(row);
+                }
+            }
+        });
 
     }
 
@@ -31,7 +58,7 @@ public class EmailController {
     private Label senderLabel;
 
     @FXML
-    private Label receiverLabel;
+    private ListView recipientsList;
 
     @FXML
     private Label bodyLabel;
@@ -50,6 +77,5 @@ public class EmailController {
     public void handleForwardClick(ActionEvent actionEvent){
         viewModel.onForwardClicked();
     }
-
 
 }

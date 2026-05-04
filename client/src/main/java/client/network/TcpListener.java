@@ -1,16 +1,17 @@
 package client.network;
 
-import client.dto.EmailDTO;
+import common.dto.EmailDTO;
 import client.model.Email;
-import client.network.message.Message;
-import client.network.message.MessageDeserializer;
-import client.network.notification.NewEmailNotification;
-import client.network.notification.Notification;
-import client.network.response.*;
+import common.network.message.Message;
+import common.network.message.MessageDeserializer;
+import common.network.notification.NewEmailNotification;
+import common.network.notification.Notification;
+import common.network.request.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import common.network.response.Response;
 
 import javax.net.ssl.SSLSocket;
 import java.io.*;

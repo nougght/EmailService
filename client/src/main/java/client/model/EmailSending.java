@@ -1,17 +1,18 @@
 package client.model;
 
+import java.util.List;
 import java.util.UUID;
 
 public class EmailSending {
     private UUID senderId;
-    private String receiverUsername;
+    private List<String> recipientUsernames;
 
     private String subject;
     private String body;
 
-    public EmailSending(UUID senderId, String receiverUsername, String subject, String body) {
+    public EmailSending(UUID senderId, List<String> recipientUsernames, String subject, String body) {
         this.senderId = senderId;
-        this.receiverUsername = receiverUsername;
+        this.recipientUsernames = recipientUsernames;
         this.subject = subject;
         this.body = body;
 
@@ -21,8 +22,8 @@ public class EmailSending {
         return senderId;
     }
 
-    public String getReceiverUsername() {
-        return receiverUsername;
+    public List<String> getRecipientUsernames() {
+        return recipientUsernames;
     }
 
     public String getSubject() {
@@ -37,8 +38,8 @@ public class EmailSending {
         this.senderId = senderId;
     }
 
-    public void setReceiverUsername(String receiverUsername) {
-        this.receiverUsername = receiverUsername;
+    public void setRecipientUsernames(List<String> recipientUsernames) {
+        this.recipientUsernames = recipientUsernames;
     }
 
     public void setSubject(String subject) {

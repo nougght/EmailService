@@ -1,6 +1,5 @@
 package client.viewModel;
 
-import client.network.request.RegistrationRequest;
 import client.service.AuthService;
 import client.service.SessionService;
 import javafx.application.Platform;

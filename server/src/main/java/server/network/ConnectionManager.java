@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class ConnectionManager {
 
@@ -31,7 +32,12 @@ public class ConnectionManager {
     }
 
 
-    public ArrayList<ClientHandler> get(UUID userId) {
+    public ArrayList<ClientHandler> getClient(UUID userId) {
         return clients.get(userId);
+    }
+
+    public ArrayList<ArrayList<ClientHandler>> getClientsByIds(List<UUID> userIds) {
+        return clients.entrySet().stream().filter(e -> userIds.contains(e.getKey()))
+                .map(Map.Entry::getValue).collect(Collectors.toCollection(ArrayList::new));
     }
 }

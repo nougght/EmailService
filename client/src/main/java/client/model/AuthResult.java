@@ -1,6 +1,6 @@
 package client.model;
 
-import client.dto.UserDTO;
+import common.dto.UserDTO;
 
 public class AuthResult {
     private String status;

@@ -4,43 +4,62 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.view.EmailFormController">
+<AnchorPane prefHeight="399.0" prefWidth="602.0" xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.view.EmailFormController">
     <children>
-        <VBox alignment="CENTER" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <VBox alignment="CENTER" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+              AnchorPane.topAnchor="0">
             <children>
                 <HBox alignment="CENTER_LEFT">
                     <children>
-                        <Label alignment="BOTTOM_LEFT" contentDisplay="CENTER" text="Кому:">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin></Label>
-                        <TextField fx:id="receiverField" alignment="BOTTOM_LEFT" HBox.hgrow="ALWAYS">
-                     <HBox.margin>
-                        <Insets bottom="10.0" right="10.0" top="10.0" />
-                     </HBox.margin></TextField>
+                        <HBox alignment="CENTER" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label alignment="BOTTOM_LEFT" contentDisplay="CENTER" text="Кому:">
+                                    <HBox.margin>
+                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                                    </HBox.margin>
+                                </Label>
+                                <TextField fx:id="receiverField" alignment="BOTTOM_LEFT" HBox.hgrow="ALWAYS">
+                                    <HBox.margin>
+                                        <Insets bottom="10.0" right="10.0" top="10.0"/>
+                                    </HBox.margin>
+                                </TextField>
+                                <Button mnemonicParsing="false" text="+" onAction="#handleAddRecipients">
+                                    <HBox.margin>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                    </HBox.margin>
+                                </Button>
+                            </children>
+                        </HBox>
+                        <ListView fx:id="recipientsList" maxHeight="300.0" prefHeight="2.0" HBox.hgrow="ALWAYS"/>
                     </children>
                 </HBox>
-            <HBox alignment="CENTER">
-               <children>
-                      <TextField fx:id="subjectField" alignment="CENTER" promptText="Введите заголовок" HBox.hgrow="ALWAYS">
-                     <HBox.margin>
-                        <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
-                     </HBox.margin></TextField>
-               </children>
-            </HBox>
-                <TextArea fx:id="bodyArea" prefHeight="200.0" prefWidth="200.0" promptText="Текст письма" VBox.vgrow="ALWAYS">
-               <VBox.margin>
-                  <Insets />
-               </VBox.margin></TextArea>
-            <Label fx:id="warningLabel" text="Label" />
-            <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleSendClick" text="Отправить">
-               <VBox.margin>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </VBox.margin></Button>
+                <HBox alignment="CENTER">
+                    <children>
+                        <TextField fx:id="subjectField" alignment="CENTER" promptText="Введите заголовок"
+                                   HBox.hgrow="ALWAYS">
+                            <HBox.margin>
+                                <Insets bottom="5.0" left="15.0" right="15.0" top="5.0"/>
+                            </HBox.margin>
+                        </TextField>
+                    </children>
+                </HBox>
+                <TextArea fx:id="bodyArea" prefHeight="200.0" prefWidth="200.0" promptText="Текст письма"
+                          VBox.vgrow="ALWAYS">
+                    <VBox.margin>
+                        <Insets/>
+                    </VBox.margin>
+                </TextArea>
+                <Label fx:id="warningLabel" text="Label"/>
+                <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleSendClick" text="Отправить">
+                    <VBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </VBox.margin>
+                </Button>
             </children>
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+            </padding>
         </VBox>
     </children>
 </AnchorPane>

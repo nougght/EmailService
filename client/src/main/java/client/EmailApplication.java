@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 
-import client.network.notification.NewEmailNotification;
-import client.network.notification.Notification;
+import common.network.notification.NewEmailNotification;
+import common.network.notification.Notification;
 import client.service.NavigationService;
 import client.view.EmailController;
 import client.view.MainController;
@@ -59,7 +59,8 @@ public class EmailApplication extends Application {
     public void start(Stage stage) throws IOException {
 
         sessionService = new SessionService(tcpClient);
-
+        // tcpClient должен получить access
+        sessionService.addListener(_ -> tcpClient.setAccessToken(sessionService.getAccessToken()));
         authService = new AuthService(tcpClient, sessionService, dataStorage);
         emailService = new EmailService(
                 tcpClient,

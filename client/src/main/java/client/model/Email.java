@@ -1,33 +1,35 @@
 package client.model;
 
+import common.dto.EmailRecipientDTO;
+
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class Email {
     private UUID emailId;
     private UUID senderId;
-    private UUID receiverId;
-
+    private String senderUsername;
     private String subject;
     private String body;
     private OffsetDateTime sentAt;
 
     private User sender;
-    private User receiver;
+    private List<EmailRecipientDTO> recipients;
 
     private String type;
 
-    public Email(UUID email_id, UUID sender_id, UUID receiver_id,
-                 String subject, String body, OffsetDateTime sent_at, User sender, User receiver,
+    public Email(UUID email_id, UUID sender_id, String senderUsername,
+                 String subject, String body, OffsetDateTime sent_at, User sender, List<EmailRecipientDTO> recipients,
                  String type) {
         this.emailId = email_id;
         this.senderId = sender_id;
-        this.receiverId = receiver_id;
+        this.senderUsername = senderUsername;
         this.subject = subject;
         this.body = body;
         this.sentAt = sent_at;
         this.sender = sender;
-        this.receiver = receiver;
+        this.recipients = recipients;
         this.type = type;
     }
 
@@ -39,8 +41,8 @@ public class Email {
         return senderId;
     }
 
-    public UUID getReceiverId() {
-        return receiverId;
+    public String getSenderUsername() {
+        return senderUsername;
     }
 
     public String getSubject() {
@@ -59,8 +61,8 @@ public class Email {
         return sender;
     }
 
-    public User getReceiver() {
-        return receiver;
+    public List<EmailRecipientDTO> getRecipients() {
+        return recipients;
     }
 
     public void setType(String type) {
@@ -71,14 +73,15 @@ public class Email {
         this.sender = sender;
     }
 
-    public void setReceiver(User receiver) {
-        this.receiver = receiver;
+    public void setRecipients(List<EmailRecipientDTO> recipients) {
+        this.recipients = recipients;
     }
 
     public void setSenderId(UUID senderId) {this.senderId = senderId;}
-    public void setReceiverId(UUID receiverId) {this.receiverId = receiverId;}
 
-
+    public void setSenderUsername(String senderUsername) {
+        this.senderUsername = senderUsername;
+    }
 
     public Boolean isInbox() {
         return type.equals("inbox");

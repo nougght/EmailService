@@ -6,6 +6,10 @@ import client.service.EmailService;
 import client.service.SessionService;
 import javafx.application.Platform;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+import java.util.ArrayList;
 
 public class EmailFormViewModel {
     private final EmailService emailService;
@@ -21,6 +25,8 @@ public class EmailFormViewModel {
 
     private ObjectProperty<Object> onEmailSent = new SimpleObjectProperty<>();
 
+    private ObservableList<String> recipients = FXCollections.observableArrayList();
+
     public EmailFormViewModel(EmailService emailService, SessionService sessionService) {
         this.emailService = emailService;
         this.sessionService = sessionService;
@@ -35,11 +41,11 @@ public class EmailFormViewModel {
         });
     }
 
-    public void setEmail(Email email) {
-        this.subject.set(email.getSubject());
-        this.receiver.set(email.getReceiver().getUsername());
-        this.body.set(email.getBody());
-    }
+//    public void setEmail(Email email) {
+//        this.subject.set(email.getSubject());
+//        this.receiver.set(email.getRecipients().getUsername());
+//        this.body.set(email.getBody());
+//    }
 
     public ObjectProperty<Object> getOnEmailSent(){
         return onEmailSent;
@@ -64,16 +70,18 @@ public class EmailFormViewModel {
         return isWarningVisible;
     }
 
+    public ObservableList<String> getRecipients() {
+        return recipients;
+    }
     public void onSendClicked() {
-        // TODO validating and warning
-        if (receiver.get() == null){
+        if (recipients.isEmpty()){
             Platform.runLater(()-> warning.set("Получатель не может быть пустым"));
         }
 
         emailService.sendEmail(
                 new EmailSending(
                         sessionService.getCurrentUser().get().getUserId(),
-                        receiver.get(),
+                        new ArrayList<>(recipients),
                         subject.get(),
                         body.get()
                 )

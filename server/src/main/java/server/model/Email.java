@@ -1,43 +1,48 @@
 package server.model;
 
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class Email {
     private UUID emailId;
     private UUID senderId;
-    private UUID receiverId;
+    private String senderUsername;
 
     private String subject;
     private String body;
     private OffsetDateTime sentAt;
 
     private User sender;
-    private User receiver;
+    private List<EmailRecipient> recipients;
 
-    public Email(UUID email_id, UUID sender_id, UUID receiver_id,
-                 String subject, String body, OffsetDateTime sent_at, User sender, User receiver) {
+    public Email(UUID email_id, UUID sender_id, String senderUsername,
+                 String subject, String body, OffsetDateTime sent_at, User sender, List<EmailRecipient> recipients) {
         this.emailId = email_id;
         this.senderId = sender_id;
-        this.receiverId = receiver_id;
+        this.senderUsername = senderUsername;
+
         this.subject = subject;
         this.body = body;
         this.sentAt = sent_at;
+
         this.sender = sender;
-        this.receiver = receiver;
+        this.recipients = recipients;
     }
 
     public UUID getEmailId() {
         return emailId;
     }
 
-    public UUID getSenderId() {
-        return senderId;
+    public Optional<UUID> getSenderId() {
+        return Optional.of(senderId);
     }
 
-    public UUID getReceiverId() {
-        return receiverId;
+    public String getSenderUsername() {
+        return senderUsername;
     }
+
 
     public String getSubject() {
         return subject;
@@ -55,8 +60,15 @@ public class Email {
         return sender;
     }
 
-    public User getReceiver() {
-        return receiver;
+    public void setSenderUsername(String senderUsername) {
+        this.senderUsername = senderUsername;
     }
 
+    public List<EmailRecipient> getRecipients() {
+        return recipients;
+    }
+
+    public void setRecipients(List<EmailRecipient> recipients) {
+        this.recipients = recipients;
+    }
 }

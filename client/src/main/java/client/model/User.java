@@ -32,4 +32,13 @@ public class User {
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
+
+    public static User placeholder() {
+        return new User(
+                null,
+                "Username",
+                null,
+                null
+        );
+    }
 }
