@@ -83,11 +83,12 @@ public class Email {
         this.senderUsername = senderUsername;
     }
 
+    // TEMP
     public Boolean isInbox() {
-        return type.equals("inbox");
+        return true;
     }
     public Boolean isOutbox(){
-        return type.equals("outbox");
+        return false;
     }
 
 }

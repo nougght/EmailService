@@ -4,6 +4,7 @@ import client.model.Email;
 import client.model.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,6 +27,25 @@ public class DataStorage {
 
     public ObservableList<Email> getAllEmails() {
         return emails;
+    }
+
+    public FilteredList<Email> getFolderEmails(String folder) {
+        switch (folder) {
+            case "INBOX":
+                return emails.filtered(Email::isOutbox);
+            case "OUTBOX":
+                return emails.filtered(Email::isInbox);
+            case "DRAFT":
+                return null;
+            case "ALL":
+                return emails.filtered(e -> true);
+            default:
+                return null;
+        }
+    }
+
+    public FilteredList<Email> getTagEmails(String tag) {
+        return null;
     }
 
 //    public ArrayList<Email> getEmailsByReceiverId(UUID receiverId) {
@@ -54,11 +74,11 @@ public class DataStorage {
     }
 
 
-    public void addUsers(Map<UUID, User> users){
+    public void addUsers(Map<UUID, User> users) {
         this.users.putAll(users);
     }
 
-    public boolean containsUserWithId(UUID id){
+    public boolean containsUserWithId(UUID id) {
         return users.containsKey(id);
     }
 

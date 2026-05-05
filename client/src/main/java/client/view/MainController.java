@@ -3,16 +3,17 @@ package client.view;
 import client.model.Email;
 import client.viewModel.MainViewModel;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SplitPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
+
+import java.util.Map;
 
 public class MainController {
 
@@ -21,51 +22,88 @@ public class MainController {
     public void setViewModel(MainViewModel viewModel) {
         this.viewModel = viewModel;
         userLabel.textProperty().bind(Bindings.selectString(viewModel.getCurrentUser(), "username"));
-        emailsList.setItems(viewModel.getEmails());
         emailsList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             viewModel.onEmailClicked(((Email) newVal).getEmailId());
         });
+        try {
+            emailsList.setCellFactory(lv -> new ListCell<Email>() {
+                private final VBox root = new VBox();
+                private final HBox row = new HBox();
+                private final Label subject = new Label();
+                private final Label from = new Label();
+                private final Label to = new Label();
 
-        emailsList.setCellFactory(lv -> new ListCell<Email>() {
-            private final VBox root = new VBox();
-            private final HBox row = new HBox();
-            private final Label subject = new Label();
-            private final Label from = new Label();
-            private final Label to = new Label();
+                {
+                    Region spacer = new Region();
+                    HBox.setHgrow(spacer, Priority.ALWAYS);
+                    row.getChildren().addAll(from, spacer, to);
+                    subject.setFont(new Font(15));
+                    from.setFont(new Font(12));
+                    to.setFont(new Font(12));
+                    root.getChildren().addAll(subject, row);
+                    root.setAlignment(Pos.CENTER);
+                    root.setPadding(new Insets(3, 0, 3, 0));
+                    VBox.setMargin(root, new Insets(13, 10, 3, 0));
 
-            {
-                Region spacer = new Region();
-                HBox.setHgrow(spacer, Priority.ALWAYS);
-                row.getChildren().addAll(from, spacer, to);
-                subject.setFont(new Font(15));
-                from.setFont(new Font(12));
-                to.setFont(new Font(12));
-                root.getChildren().addAll(subject, row);
-                root.setAlignment(Pos.CENTER);
-                root.setPadding(new Insets(3, 0, 3, 0));
-                VBox.setMargin(root, new Insets(13, 10, 3, 0));
+                }
 
-            }
-
-            @Override
-            protected void updateItem(Email email, boolean empty) {
-                System.out.println("Update email item:" + email);
-                super.updateItem(email, empty);
+                @Override
+                protected void updateItem(Email email, boolean empty) {
+                    System.out.println("Update email item:" + email);
+                    super.updateItem(email, empty);
 
 
-                if (empty || email == null) {
-                    setGraphic(null);
-                } else {
-                    subject.setText(email.getSubject());
-                    from.setText(email.getSender().getUsername());
-                    to.setText(email.getRecipients().getFirst().getUsername());
+                    if (empty || email == null) {
+                        setGraphic(null);
+                    } else {
+                        subject.setText(email.getSubject());
+                        from.setText(email.getSender().getUsername());
+                        to.setText(email.getRecipients().getFirst().getUsername());
 //                    onMouseClickedProperty().addListener( _ -> {
 //                        viewModel.onEmailClicked(email.getEmailId());
 //                    });
-                    setGraphic(root);
+                        setGraphic(root);
+                    }
                 }
+            });
+
+            var root = tree.getRoot();
+            var foldersRoot = new TreeItem<>("Папки");
+            var tagsRoot = new TreeItem<>("Теги");
+            root.getChildren().addAll(foldersRoot, tagsRoot);
+            for (var item : viewModel.getFolderNames().entrySet()) {
+                foldersRoot.getChildren().add(new TreeItem<String>(item.getKey()));
             }
-        });
+
+            tree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<String>>() {
+
+                @Override
+                public void changed(ObservableValue<? extends TreeItem<String>> observableValue,
+                                    TreeItem<String> oldItem, TreeItem<String> newItem) {
+                    var item = newItem;
+                    var t = item.getValue();
+                    emailsList.setItems(viewModel.getFolderEmails(viewModel.getFolderNames().get( item.getValue())));
+                }
+            });
+
+            tree.setCellFactory(tv -> new TreeCell<String>() {
+                private Label name = new Label();
+
+                {
+                    name.setFont(new Font(15));
+                }
+
+                @Override
+                protected void updateItem(String item, boolean b) {
+                    super.updateItem(item, b);
+                    name.setText(item);
+                    setGraphic(name);
+                }
+            });
+            tree.getSelectionModel().select(2);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @FXML
@@ -76,6 +114,9 @@ public class MainController {
 
     @FXML
     private Label userLabel;
+
+    @FXML
+    private TreeView<String> tree;
 
     @FXML
     private ListView emailsList;

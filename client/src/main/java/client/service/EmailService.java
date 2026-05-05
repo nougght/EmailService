@@ -21,6 +21,7 @@ import client.network.TcpClient;
 import client.storage.DataStorage;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 public class EmailService {
     final private TcpClient tcpClient;
@@ -70,6 +71,14 @@ public class EmailService {
         return storage.getAllEmails();
     }
 
+    public FilteredList<Email> getFolderEmails(String folder) {
+        return storage.getFolderEmails(folder);
+    }
+
+    public FilteredList<Email> getTagEmails(String tag){
+        return storage.getTagEmails(tag);
+    }
+
     public void loadUserEmails(UUID userId) {
         if (userId == null) {
             var user = sessionService.getCurrentUser().getValue();
@@ -108,7 +117,7 @@ public class EmailService {
     public CompletableFuture<Integer> loadUsers(List<UUID> ids) {
         if (ids.isEmpty()) return CompletableFuture.completedFuture(0);
         for (var i = 0; i < ids.size(); ) {
-            if (!storage.containsUserWithId(ids.get(i))) {
+            if (storage.containsUserWithId(ids.get(i))) {
                 ids.remove(i);
             } else {
                 i++;

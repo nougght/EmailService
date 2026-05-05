@@ -8,28 +8,50 @@ import client.service.SessionService;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class MainViewModel {
     private final AuthService authService;
     private final EmailService emailService;
     private final SessionService sessionService;
+    private ObjectProperty<User> currentUser;
+
+    private FilteredList<Email> allEmails;
+    private FilteredList<Email> inbox;
+    private FilteredList<Email> outbox;
+    private FilteredList<Email> drafts;
+
+//    private List<FilteredList<Email>> tagEmails;
+
+
+    private final Map<String, String> folderNames = new HashMap<>(Map.ofEntries(
+            Map.entry("Все письма", "ALL"),
+            Map.entry("Входящие", "INBOX"),
+            Map.entry("Исходящие", "OUTBOX"),
+            Map.entry("Черновики", "DRAFTS")
+    ));
+
 
     public MainViewModel(AuthService authService, EmailService emailService, SessionService sessionService) {
         this.authService = authService;
         this.emailService = emailService;
         this.sessionService = sessionService;
         currentUser = sessionService.getCurrentUser();
-        emails = emailService.getEmailsList();
+        allEmails = emailService.getFolderEmails("ALL");
+        inbox = emailService.getFolderEmails("INBOX");
+        outbox = emailService.getFolderEmails("OUTBOX");
+        drafts = emailService.getFolderEmails("DRAFTS");
     }
 
     private final ObjectProperty<Object> onLogout = new SimpleObjectProperty<>();
     private final ObjectProperty<UUID> onOpenEmail = new SimpleObjectProperty<>();
     private final ObjectProperty<Object> onNewEmail = new SimpleObjectProperty<>();
 
-    private ObjectProperty<User> currentUser;
-    private ObservableList<Email> emails;
 
     public ObjectProperty<Object> getOnLogout() {
         return onLogout;
@@ -38,6 +60,7 @@ public class MainViewModel {
     public ObjectProperty<UUID> getOnOpenEmail() {
         return onOpenEmail;
     }
+
     public ObjectProperty<Object> getOnNewEmail() {
         return onNewEmail;
     }
@@ -46,8 +69,23 @@ public class MainViewModel {
         return currentUser;
     }
 
-    public ObservableList<Email> getEmails() {
-        return emails;
+    public Map<String, String> getFolderNames() {
+        return folderNames;
+    }
+
+    public FilteredList<Email> getFolderEmails(String folder) {
+        switch (folder) {
+            case "INBOX":
+                return inbox;
+            case "OUTBOX":
+                return outbox;
+            case "DRAFT":
+                return drafts;
+            case "ALL":
+                return allEmails;
+            default:
+                return null;
+        }
     }
 
     public void onRefreshClicked() {
