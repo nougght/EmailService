@@ -1,9 +1,8 @@
 package common.network.request;
 
-import common.network.message.Message;
-
 import java.util.UUID;
 
+import common.network.message.Message;
 
 // запрос от клиента к серверу
 public abstract class Request extends Message {
@@ -23,7 +22,6 @@ public abstract class Request extends Message {
         return requestId;
     }
 
-
     public String getAccessToken() {
         return accessToken;
     }
@@ -31,7 +29,6 @@ public abstract class Request extends Message {
     public void setRequestId(UUID requestId) {
         this.requestId = requestId;
     }
-
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;

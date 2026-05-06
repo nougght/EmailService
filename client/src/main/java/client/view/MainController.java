@@ -52,7 +52,6 @@ public class MainController {
                     System.out.println("Update email item:" + email);
                     super.updateItem(email, empty);
 
-
                     if (empty || email == null) {
                         setGraphic(null);
                     } else {
@@ -82,7 +81,7 @@ public class MainController {
                                     TreeItem<String> oldItem, TreeItem<String> newItem) {
                     var item = newItem;
                     var t = item.getValue();
-                    emailsList.setItems(viewModel.getFolderEmails(viewModel.getFolderNames().get( item.getValue())));
+                    emailsList.setItems(viewModel.getFolderEmails(viewModel.getFolderNames().get(item.getValue())));
                 }
             });
 
@@ -121,7 +120,6 @@ public class MainController {
     @FXML
     private ListView emailsList;
 
-
     public BorderPane getBorderPane() {
         return borderPane;
     }
@@ -133,10 +131,6 @@ public class MainController {
     @FXML
     private void initialize() {
     }
-//    @FXML
-//    protected void onHelloButtonClick() {
-//        welcomeText.setText("Welcome to JavaFX Application!");
-//    }
 
     public void handleClick(ActionEvent actionEvent) {
         viewModel.onRefreshClicked();

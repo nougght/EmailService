@@ -1,5 +1,9 @@
 package client.viewModel;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import client.model.Email;
 import client.model.User;
 import client.service.AuthService;
@@ -7,13 +11,7 @@ import client.service.EmailService;
 import client.service.SessionService;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public class MainViewModel {
     private final AuthService authService;
@@ -28,14 +26,12 @@ public class MainViewModel {
 
 //    private List<FilteredList<Email>> tagEmails;
 
-
     private final Map<String, String> folderNames = new HashMap<>(Map.ofEntries(
             Map.entry("Все письма", "ALL"),
             Map.entry("Входящие", "INBOX"),
             Map.entry("Исходящие", "OUTBOX"),
             Map.entry("Черновики", "DRAFTS")
     ));
-
 
     public MainViewModel(AuthService authService, EmailService emailService, SessionService sessionService) {
         this.authService = authService;
@@ -51,7 +47,6 @@ public class MainViewModel {
     private final ObjectProperty<Object> onLogout = new SimpleObjectProperty<>();
     private final ObjectProperty<UUID> onOpenEmail = new SimpleObjectProperty<>();
     private final ObjectProperty<Object> onNewEmail = new SimpleObjectProperty<>();
-
 
     public ObjectProperty<Object> getOnLogout() {
         return onLogout;

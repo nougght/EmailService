@@ -1,13 +1,12 @@
 package server.repositories;
 
-import server.database.DatabaseManager;
-import server.model.Token;
-
-import javax.xml.crypto.Data;
 import java.sql.PreparedStatement;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
+
+import server.database.DatabaseManager;
+import server.model.Token;
 
 public class TokenRepository {
 
@@ -45,7 +44,6 @@ public class TokenRepository {
             var st = con.prepareStatement("DELETE FROM tokens WHERE user_id = ?");
             st.setObject(1, token.getUserId());
             st.executeUpdate();
-
 
             st = con.prepareStatement(
                     "INSERT INTO tokens(user_id, token_hash, expires_at) VALUES (?, ?, ?)"

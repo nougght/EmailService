@@ -127,7 +127,6 @@ public class EmailRepository {
         return Optional.<UUID>empty();
     }
 
-
     public Optional<Email> getEmail(UUID emailId) {
         try {
             var con = DatabaseManager.getConnection();

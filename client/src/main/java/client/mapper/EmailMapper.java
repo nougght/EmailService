@@ -1,6 +1,5 @@
 package client.mapper;
 
-
 import client.model.Email;
 import common.dto.EmailDTO;
 

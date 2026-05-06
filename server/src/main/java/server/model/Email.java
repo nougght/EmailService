@@ -43,7 +43,6 @@ public class Email {
         return senderUsername;
     }
 
-
     public String getSubject() {
         return subject;
     }

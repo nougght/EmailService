@@ -1,10 +1,10 @@
 package client.service;
 
+import java.util.concurrent.CompletableFuture;
+
 import client.mapper.UserMapper;
 import client.network.TcpClient;
 import client.storage.DataStorage;
-
-import java.util.concurrent.CompletableFuture;
 
 public class AuthService {
     final private TcpClient tcpClient;
@@ -16,7 +16,6 @@ public class AuthService {
         this.sessionService = sessionService;
         this.storage = storage;
     }
-
 
     public CompletableFuture<String> tryAutoAuth(){
         sessionService.LoadRefreshTokenAndUserId();
@@ -55,7 +54,6 @@ public class AuthService {
         });
     }
 
-
     public CompletableFuture<String> logout() {
         return tcpClient.requestLogout(sessionService.getCurrentUser().get().getUserId()).thenApply(s -> {
             if (s.equals("success")){
@@ -66,6 +64,5 @@ public class AuthService {
             return s;
         });
     }
-
 
 }

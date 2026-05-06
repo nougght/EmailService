@@ -1,21 +1,16 @@
 package server.network;
 
-import server.services.AuthService;
-import server.services.EmailService;
-import server.services.UserService;
+import java.io.DataInputStream;
+import java.security.KeyStore;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
-import server.network.ConnectionManager;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.security.KeyStore;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+
+import server.services.AuthService;
+import server.services.EmailService;
+import server.services.UserService;
 
 public class TcpServer {
 
@@ -27,7 +22,6 @@ public class TcpServer {
     private final EmailService emailService;
     private final UserService userService;
     private final ConnectionManager connectionManager = new ConnectionManager();
-
 
     public TcpServer(int port, AuthService authService, EmailService emailService, UserService userService) {
         this.authService = authService;
@@ -49,7 +43,6 @@ public class TcpServer {
 
             SSLServerSocketFactory ssf = ctx.getServerSocketFactory();
 
-
             ssock = (SSLServerSocket) ssf.createServerSocket(port);
             ssock.setNeedClientAuth(false);
             ssock.setWantClientAuth(false);
@@ -68,5 +61,4 @@ public class TcpServer {
         }
     }
 }
-
 

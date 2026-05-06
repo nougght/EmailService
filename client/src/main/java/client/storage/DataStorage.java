@@ -1,13 +1,17 @@
 package client.storage;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import client.model.Email;
 import client.model.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 // хранилище, предоставляющее доступ к данным, но без логики обработки
 public class DataStorage {
@@ -68,11 +72,9 @@ public class DataStorage {
 //        return users.stream().filter(u -> u.getUsername().equals(username)).findFirst();
 //    }
 
-
     public void addUser(User user) {
         users.put(user.getUserId(), user);
     }
-
 
     public void addUsers(Map<UUID, User> users) {
         this.users.putAll(users);
@@ -81,7 +83,6 @@ public class DataStorage {
     public boolean containsUserWithId(UUID id) {
         return users.containsKey(id);
     }
-
 
     public void addEmail(Email email) {
         emails.add(email);

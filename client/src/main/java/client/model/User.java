@@ -1,6 +1,5 @@
 package client.model;
 
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
 

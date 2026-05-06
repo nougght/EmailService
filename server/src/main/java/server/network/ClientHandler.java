@@ -1,32 +1,54 @@
 package server.network;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import common.network.message.Message;
+import common.network.message.MessageDeserializer;
+import common.network.notification.NewEmailNotification;
+import common.network.notification.Notification;
+import common.network.request.GetEmailsRequest;
+import common.network.request.GetUserRequest;
+import common.network.request.GetUsersRequest;
+import common.network.request.LoginRequest;
+import common.network.request.LogoutRequest;
+import common.network.request.RefreshRequest;
+import common.network.request.RegistrationRequest;
+import common.network.request.Request;
+import common.network.request.SendEmailRequest;
+import common.network.response.GetEmailsResponse;
+import common.network.response.GetUserResponse;
+import common.network.response.GetUsersResponse;
+import common.network.response.LoginResponse;
+import common.network.response.LogoutResponse;
+import common.network.response.RefreshResponse;
+import common.network.response.RegistrationResponse;
+import common.network.response.SendEmailResponse;
 import server.mapper.EmailMapper;
 import server.mapper.UserMapper;
 import server.model.Email;
 import server.model.EmailRecipient;
 import server.model.User;
-import common.network.message.Message;
-import common.network.message.MessageDeserializer;
-import common.network.notification.NewEmailNotification;
-import common.network.notification.Notification;
-import common.network.request.*;
-import common.network.response.*;
 import server.services.AuthService;
 import server.services.EmailService;
 import server.services.UserService;
-
-
-import java.io.*;
-import java.net.Socket;
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.stream.Collectors;
 
 public class ClientHandler implements Runnable {
 
@@ -41,7 +63,6 @@ public class ClientHandler implements Runnable {
     private final BlockingQueue<Notification> notifications = new LinkedBlockingQueue<>();
     private final ConnectionManager connectionManager;
     private UUID userId;
-
 
     ClientHandler(Socket socket, AuthService authService, EmailService emailService, UserService userService, ConnectionManager connectionManager) {
         this.socket = socket;
@@ -64,7 +85,6 @@ public class ClientHandler implements Runnable {
             System.out.println(e.toString());
         }
     }
-
 
     public void send(Notification ntf) {
         notifications.offer(ntf);

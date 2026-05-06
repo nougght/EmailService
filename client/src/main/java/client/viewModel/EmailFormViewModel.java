@@ -1,20 +1,23 @@
 package client.viewModel;
 
-import client.model.Email;
+import java.util.ArrayList;
+
 import client.model.EmailSending;
 import client.service.EmailService;
 import client.service.SessionService;
 import javafx.application.Platform;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
-import java.util.ArrayList;
 
 public class EmailFormViewModel {
     private final EmailService emailService;
     private final SessionService sessionService;
-
 
     private StringProperty subject = new SimpleStringProperty();
     private StringProperty receiver = new SimpleStringProperty();
@@ -93,6 +96,5 @@ public class EmailFormViewModel {
             }
         });
     }
-
 
 }

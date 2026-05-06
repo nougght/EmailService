@@ -3,38 +3,27 @@ package client;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.UUID;
-
-import common.network.notification.NewEmailNotification;
-import common.network.notification.Notification;
-import client.service.NavigationService;
-import client.view.EmailController;
-import client.view.MainController;
-import client.viewModel.EmailViewModel;
-import client.viewModel.MainViewModel;
-import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
-import javafx.geometry.Insets;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.*;
-import javafx.scene.text.Font;
-import org.javatuples.Pair;
 
 import client.network.TcpClient;
 import client.service.AuthService;
 import client.service.EmailService;
+import client.service.NavigationService;
 import client.service.SessionService;
 import client.storage.DataStorage;
-import client.view.LoginController;
-import client.view.RegistrationController;
-import client.viewModel.LoginViewModel;
-import client.viewModel.RegistrationViewModel;
+import common.network.notification.NewEmailNotification;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -47,12 +36,10 @@ public class EmailApplication extends Application {
     private SessionService sessionService;
     private StackPane mainPane;
 
-
     public EmailApplication() {
         tcpClient = new TcpClient("localhost", 3741);
         dataStorage = new DataStorage();
     }
-
 
 
     @Override
@@ -71,7 +58,6 @@ public class EmailApplication extends Application {
         tcpClient.start();
         System.out.println("start session");
 
-
         NavigationService navigationService = new NavigationService(authService, sessionService, emailService, stage);
 
         authService.tryAutoAuth().thenAccept(s -> {
@@ -86,16 +72,13 @@ public class EmailApplication extends Application {
         });
 
 
-
         // вывод необработанных исключений в модальном окне
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
 
             Stage modalStage = new Stage();
             modalStage.setTitle("Exception");
 
-
             modalStage.initModality(Modality.WINDOW_MODAL);
-
 
             modalStage.initOwner(stage);
 

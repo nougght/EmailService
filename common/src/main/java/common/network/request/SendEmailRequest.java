@@ -3,14 +3,12 @@ package common.network.request;
 import java.util.List;
 import java.util.UUID;
 
-
 public class SendEmailRequest extends Request {
     private UUID senderId;
     private List<String> recipientUsernames;
 
     private String subject;
     private String body;
-
 
     public SendEmailRequest() {
         super();

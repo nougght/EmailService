@@ -1,7 +1,6 @@
 package client.viewModel;
 
 import client.model.Email;
-import client.model.User;
 import client.service.EmailService;
 import client.service.SessionService;
 import common.dto.EmailRecipientDTO;
@@ -25,7 +24,6 @@ public class EmailViewModel {
 
     private ObjectProperty<Object> onReply = new SimpleObjectProperty<>();
     private ObjectProperty<Object> onForward = new SimpleObjectProperty<>();
-
 
     public EmailViewModel(EmailService emailService, SessionService sessionService, Email email){
         this.emailService = emailService;

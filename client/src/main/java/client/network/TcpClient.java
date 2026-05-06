@@ -101,7 +101,6 @@ public class TcpClient extends Thread {
         }
     }
 
-
     public CompletableFuture<AuthResult> requestRegistration(String username, String password) {
         try {
             var request = new RegistrationRequest(username, password);
@@ -183,17 +182,7 @@ public class TcpClient extends Thread {
                     .exceptionally(ex -> {
                         throw new RuntimeException(ex.toString());
                     });
-//            sOut.println(jsonRequest);
-//            String response = "";
-////                    sIn.readLine();
-////            System.out.println("response: " + response);
-////            GetUserResponse getUserResponse = jsonMapper.readValue(response, GetUserResponse.class);
-////            if (getUserResponse.getStatus().equals("success")) {
-////                return Optional.ofNullable(getUserResponse.getUserDTO());
-////            } else {
-//            return Optional.empty();
-////            }
-//
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -243,7 +232,7 @@ public class TcpClient extends Thread {
                     return new HashMap<>();
                 }
             });
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -275,13 +264,6 @@ public class TcpClient extends Thread {
         }
     }
 
-    //    public CompletableFuture<Optional<Email>> requestEmailByEmailId(UUID emailId){
-//        try {
-//            var request = new
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
     public CompletableFuture<AuthResult> requestAutoAuth(String refreshToken, UUID userId) {
         try {
             var request = new RefreshRequest(userId, refreshToken);

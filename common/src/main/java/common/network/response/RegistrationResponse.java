@@ -1,8 +1,8 @@
 package common.network.response;
 
-import common.dto.UserDTO;
-
 import java.util.UUID;
+
+import common.dto.UserDTO;
 
 public class RegistrationResponse extends Response{
     private UserDTO user;
@@ -31,7 +31,6 @@ public class RegistrationResponse extends Response{
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
-
 
     public UserDTO getUser() {
         return user;

@@ -5,12 +5,12 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
-import javafx.application.Platform;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 
 import client.model.User;
 import client.network.TcpClient;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -19,7 +19,6 @@ public class SessionService {
     private String accessToken;
     private String refreshToken;
     private UUID savedUserId;
-
 
     final private StandardPBEStringEncryptor encryptor;
 

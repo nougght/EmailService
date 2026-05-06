@@ -1,6 +1,5 @@
 package common.network.response;
 
-
 import java.util.UUID;
 
 import common.dto.EmailDTO;

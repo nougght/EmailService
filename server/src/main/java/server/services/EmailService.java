@@ -1,11 +1,11 @@
 package server.services;
 
-import server.model.Email;
-import server.repositories.EmailRepository;
-
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
+
+import server.model.Email;
+import server.repositories.EmailRepository;
 
 public class EmailService {
     final private EmailRepository emailRepo;
@@ -14,12 +14,10 @@ public class EmailService {
         this.emailRepo = emailRepo;
     }
 
-
     public ArrayList<Email> getUserEmails(UUID userId)
     {
         return emailRepo.getUserEmails(userId);
     }
-
 
     public Optional<Email> addEmail(Email email) {
         var optional = emailRepo.addEmail(email);

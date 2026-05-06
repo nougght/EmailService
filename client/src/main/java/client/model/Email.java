@@ -1,10 +1,10 @@
 package client.model;
 
-import common.dto.EmailRecipientDTO;
-
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import common.dto.EmailRecipientDTO;
 
 public class Email {
     private UUID emailId;
@@ -92,5 +92,4 @@ public class Email {
     }
 
 }
-
 
