@@ -17,8 +17,11 @@ public class Email {
     private User sender;
     private List<EmailRecipient> recipients;
 
+    private UserEmail details;
+
     public Email(UUID email_id, UUID sender_id, String senderUsername,
-                 String subject, String body, OffsetDateTime sent_at, User sender, List<EmailRecipient> recipients) {
+                 String subject, String body, OffsetDateTime sent_at, User sender, List<EmailRecipient> recipients,
+                 UserEmail details) {
         this.emailId = email_id;
         this.senderId = sender_id;
         this.senderUsername = senderUsername;
@@ -29,6 +32,7 @@ public class Email {
 
         this.sender = sender;
         this.recipients = recipients;
+        this.details = details;
     }
 
     public UUID getEmailId() {
@@ -59,6 +63,10 @@ public class Email {
         return sender;
     }
 
+    public Optional<UserEmail> getDetails() {
+        return Optional.ofNullable(details);
+    }
+
     public void setSenderUsername(String senderUsername) {
         this.senderUsername = senderUsername;
     }
@@ -70,4 +78,9 @@ public class Email {
     public void setRecipients(List<EmailRecipient> recipients) {
         this.recipients = recipients;
     }
+
+    public void setDetails(UserEmail details) {
+        this.details = details;
+    }
+
 }

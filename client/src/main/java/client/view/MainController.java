@@ -32,6 +32,8 @@ public class MainController {
                 private final Label subject = new Label();
                 private final Label from = new Label();
                 private final Label to = new Label();
+                private final String readStyle = "-fx-text-fill=gray;";
+                private final String newStyle = "-fx-text-fill=steelblue";
 
                 {
                     Region spacer = new Region();
@@ -61,6 +63,11 @@ public class MainController {
 //                    onMouseClickedProperty().addListener( _ -> {
 //                        viewModel.onEmailClicked(email.getEmailId());
 //                    });
+                        if (email.isRead()) {
+                            root.setStyle(readStyle);
+                        } else {
+                            root.setStyle(newStyle);
+                        }
                         setGraphic(root);
                     }
                 }
@@ -81,7 +88,7 @@ public class MainController {
                                     TreeItem<String> oldItem, TreeItem<String> newItem) {
                     var item = newItem;
                     var t = item.getValue();
-                    emailsList.setItems(viewModel.getFolderEmails(viewModel.getFolderNames().get(item.getValue())));
+                    emailsList.setItems(viewModel.getFolderEmails(viewModel.getFolderNames().get(t)));
                 }
             });
 

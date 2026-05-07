@@ -35,16 +35,10 @@ public class DataStorage {
 
     public FilteredList<Email> getFolderEmails(String folder) {
         switch (folder) {
-            case "INBOX":
-                return emails.filtered(Email::isOutbox);
-            case "OUTBOX":
-                return emails.filtered(Email::isInbox);
-            case "DRAFT":
-                return null;
             case "ALL":
                 return emails.filtered(e -> true);
             default:
-                return null;
+                return emails.filtered(e -> e.getFolder().equals(folder));
         }
     }
 

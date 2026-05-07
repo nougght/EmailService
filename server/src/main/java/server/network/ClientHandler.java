@@ -46,6 +46,7 @@ import server.mapper.UserMapper;
 import server.model.Email;
 import server.model.EmailRecipient;
 import server.model.User;
+import server.model.UserEmail;
 import server.services.AuthService;
 import server.services.EmailService;
 import server.services.UserService;
@@ -344,8 +345,11 @@ public class ClientHandler implements Runnable {
     }
 
     public void sendEmailHandler(SendEmailRequest request) {
+        UUID userId = authService.verifyAccessToken(request.getAccessToken());
+        if (userId == null)
+            return;
         try {
-            var status = "fale";
+            var status = "fail";
             Email email = null;
 
 //            var recipients = userService.getUsersByUsernames(request.getRecipientUsernames())
@@ -366,9 +370,10 @@ public class ClientHandler implements Runnable {
                     request.getBody(),
                     null,
                     null,
-                    recipients
+                    recipients,
+                    null
+            ), userId);
 
-            ));
             if (optionalEmail.isPresent()) {
                 status = "success";
                 email = optionalEmail.get();
@@ -376,11 +381,15 @@ public class ClientHandler implements Runnable {
                 var handlers = connectionManager.getClientsByIds(email.getRecipients().stream().map(r -> {
                     return r.getUserId().orElse(null);
                 }).toList());
-                handlers.forEach(lst -> lst.forEach(h -> {
-                    h.send(new NewEmailNotification(
-                            EmailMapper.toDTO(e)
-                    ));
-                }));
+                for (var i = 0; i < handlers.size(); i++) {
+                    e.setDetails(new UserEmail(email.getRecipients().get(i).getUserId().orElseThrow(),
+                            "INBOX", false));
+                    handlers.get(i).forEach(h -> {
+                        h.send(new NewEmailNotification(
+                                EmailMapper.toDTO(e)
+                        ));
+                    });
+                }
             }
 
             var response = new SendEmailResponse(
@@ -390,7 +399,8 @@ public class ClientHandler implements Runnable {
             );
             var json = jsonMapper.writeValueAsString(response);
             sOut.println(json);
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             throw new RuntimeException(e);
         }
     }

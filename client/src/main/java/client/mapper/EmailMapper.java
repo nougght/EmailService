@@ -15,7 +15,8 @@ public class EmailMapper {
                 dto.getSentAt(),
                 null,
                 dto.getRecipients(),
-                null
+                dto.getFolder(),
+                dto.isRead()
         );
     }
 }

@@ -4,10 +4,7 @@ import client.model.Email;
 import client.service.EmailService;
 import client.service.SessionService;
 import common.dto.EmailRecipientDTO;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -21,6 +18,7 @@ public class EmailViewModel {
     private StringProperty sender = new SimpleStringProperty();
     private ObservableList<EmailRecipientDTO> recipients = FXCollections.observableArrayList();
     private StringProperty body = new SimpleStringProperty();
+    private BooleanProperty isRead = new SimpleBooleanProperty();
 
     private ObjectProperty<Object> onReply = new SimpleObjectProperty<>();
     private ObjectProperty<Object> onForward = new SimpleObjectProperty<>();
@@ -41,6 +39,7 @@ public class EmailViewModel {
         sender.set(email.getSender().getUsername());
         recipients.addAll(email.getRecipients());
         body.set(email.getBody());
+        isRead.set(email.isRead());
     }
 
     public StringProperty getSubject() {

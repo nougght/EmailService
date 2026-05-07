@@ -19,16 +19,16 @@ public class EmailService {
         return emailRepo.getUserEmails(userId);
     }
 
-    public Optional<Email> addEmail(Email email) {
+    public Optional<Email> addEmail(Email email, UUID userId) {
         var optional = emailRepo.addEmail(email);
         if (optional.isPresent()) {
             UUID emailId = optional.get();
-            return emailRepo.getEmail(emailId);
+            return emailRepo.getEmail(emailId, userId);
         }
         return Optional.empty();
     }
 
-    public Optional<Email> getEmail(UUID emailId) {
-        return emailRepo.getEmail(emailId);
+    public Optional<Email> getEmail(UUID emailId, UUID userId) {
+        return emailRepo.getEmail(emailId, userId);
     }
 }
