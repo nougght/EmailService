@@ -1,10 +1,13 @@
 package client.viewModel;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import client.model.EmailSending;
+import client.service.DraftService;
 import client.service.EmailService;
 import client.service.SessionService;
+import common.dto.Draft;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -17,6 +20,7 @@ import javafx.collections.ObservableList;
 
 public class EmailFormViewModel {
     private final EmailService emailService;
+    private final DraftService draftService;
     private final SessionService sessionService;
 
     private StringProperty subject = new SimpleStringProperty();
@@ -30,8 +34,11 @@ public class EmailFormViewModel {
 
     private ObservableList<String> recipients = FXCollections.observableArrayList();
 
-    public EmailFormViewModel(EmailService emailService, SessionService sessionService) {
+    private Draft draft;
+
+    public EmailFormViewModel(EmailService emailService, DraftService draftService, SessionService sessionService, Draft draft) {
         this.emailService = emailService;
+        this.draftService = draftService;
         this.sessionService = sessionService;
 //        setEmail(email);
         isWarningVisible.set(false);
@@ -42,13 +49,23 @@ public class EmailFormViewModel {
                 isWarningVisible.set(true);
             }
         });
+        setDraft(draft);
     }
 
-//    public void setEmail(Email email) {
-//        this.subject.set(email.getSubject());
-//        this.receiver.set(email.getRecipients().getUsername());
-//        this.body.set(email.getBody());
-//    }
+    private void setDraft(Draft draft) {
+        this.subject.set(draft.getSubject());
+        this.recipients.addAll(draft.getRecipients());
+        this.body.set(draft.getBody());
+        this.draft = draft;
+    }
+
+    public void saveDraft(){
+        System.out.println("saving draft");
+        draft.setSubject(subject.get());
+        draft.setBody(body.get());
+        draft.setRecipients(recipients.stream().toList());
+        draftService.updateDraft(draft);
+    }
 
     public ObjectProperty<Object> getOnEmailSent(){
         return onEmailSent;
@@ -86,13 +103,17 @@ public class EmailFormViewModel {
                         sessionService.getCurrentUser().get().getUserId(),
                         new ArrayList<>(recipients),
                         subject.get(),
-                        body.get()
+                        body.get(),
+                        draft.getDraftId()
                 )
         ).thenAccept(e -> {
             if (e.isEmpty()) {
                 Platform.runLater(()-> warning.set("Ошибка отправки"));
             } else {
-                Platform.runLater(()-> onEmailSent.set(new Object()));
+                Platform.runLater(()-> {
+                    draftService.deleteDraft(draft.getDraftId());
+                    onEmailSent.set(new Object());
+                });
             }
         });
     }

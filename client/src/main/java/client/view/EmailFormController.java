@@ -35,8 +35,14 @@ public class EmailFormController {
                 row.getChildren().addAll(username, spacer, removeButton);
                 username.setFont(new Font(15));
                 row.setPadding(new Insets(5, 5, 5, 5));
+                row.focusedProperty().addListener((obs, oldValue, newValue) -> {
+                    if (!newValue) {
+                        vm.saveDraft();
+                    }
+                });
 
             }
+
 
             @Override
             protected void updateItem(String username, boolean empty){

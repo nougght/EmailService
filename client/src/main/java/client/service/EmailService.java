@@ -16,6 +16,7 @@ import client.model.User;
 import client.network.TcpClient;
 import client.storage.DataStorage;
 import common.dto.EmailDTO;
+import common.dto.EmailItem;
 import common.dto.EmailRecipientDTO;
 import common.dto.UserDTO;
 import javafx.application.Platform;
@@ -69,7 +70,7 @@ public class EmailService {
         return storage.getAllEmails();
     }
 
-    public FilteredList<Email> getFolderEmails(String folder) {
+    public FilteredList<? extends EmailItem> getFolderEmails(String folder) {
         return storage.getFolderEmails(folder);
     }
 

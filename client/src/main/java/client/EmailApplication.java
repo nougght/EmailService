@@ -5,10 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import client.network.TcpClient;
-import client.service.AuthService;
-import client.service.EmailService;
-import client.service.NavigationService;
-import client.service.SessionService;
+import client.service.*;
 import client.storage.DataStorage;
 import common.network.notification.NewEmailNotification;
 import javafx.application.Application;
@@ -33,6 +30,7 @@ public class EmailApplication extends Application {
     private final DataStorage dataStorage;
     private AuthService authService;
     private EmailService emailService;
+    private DraftService draftService;
     private SessionService sessionService;
     private StackPane mainPane;
 
@@ -54,11 +52,12 @@ public class EmailApplication extends Application {
                 sessionService,
                 dataStorage
         );
-
+        draftService = new DraftService(tcpClient, sessionService, dataStorage);
         tcpClient.start();
         System.out.println("start session");
 
-        NavigationService navigationService = new NavigationService(authService, sessionService, emailService, stage);
+        NavigationService navigationService = new NavigationService(authService, sessionService, emailService,
+                draftService, stage);
 
         authService.tryAutoAuth().thenAccept(s -> {
             if (s.equals("success")) {
@@ -118,13 +117,13 @@ public class EmailApplication extends Application {
 
         stage.show();
         // TODO move to another place
-        new Thread(()-> {
+        new Thread(() -> {
             while (true) {
                 try {
                     var ntf = tcpClient.getNotifications().take();
                     var type = ntf.getType();
                     switch (type) {
-                        case "NewEmail" -> emailService.addEmail(((NewEmailNotification)ntf).getEmailDTO());
+                        case "NewEmail" -> emailService.addEmail(((NewEmailNotification) ntf).getEmailDTO());
                     }
                 } catch (Exception e) {
                     throw new RuntimeException(e);

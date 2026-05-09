@@ -22,6 +22,12 @@ public class DraftService {
         return repo.getDraftsByUserId(userId);
     }
 
+    public void updateDraft(Draft draft) {
+        if (repo.draftExists(draft.getDraftId())) {
+            repo.updateDraft(draft);
+        }
+    }
+
     public void delete(UUID draftId) {
         repo.delete(draftId);
     }

@@ -10,12 +10,14 @@ public class EmailSending {
     private String subject;
     private String body;
 
-    public EmailSending(UUID senderId, List<String> recipientUsernames, String subject, String body) {
+    private UUID draftId;
+
+    public EmailSending(UUID senderId, List<String> recipientUsernames, String subject, String body, UUID draftId) {
         this.senderId = senderId;
         this.recipientUsernames = recipientUsernames;
         this.subject = subject;
         this.body = body;
-
+        this.draftId = draftId;
     }
 
     public UUID getSenderId() {
@@ -34,6 +36,10 @@ public class EmailSending {
         return body;
     }
 
+    public UUID getDraftId() {
+        return draftId;
+    }
+
     public void setSenderId(UUID senderId) {
         this.senderId = senderId;
     }
@@ -48,5 +54,9 @@ public class EmailSending {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public void setDraftId(UUID draftId) {
+        this.draftId = draftId;
     }
 }

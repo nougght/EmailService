@@ -1,14 +1,12 @@
 package client.storage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import client.model.Email;
 import client.model.User;
+import common.dto.Draft;
+import common.dto.EmailItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -16,6 +14,7 @@ import javafx.collections.transformation.FilteredList;
 // хранилище, предоставляющее доступ к данным, но без логики обработки
 public class DataStorage {
     final private ObservableList<Email> emails = FXCollections.observableArrayList();
+    final private ObservableList<Draft> drafts = FXCollections.observableArrayList();
     final private Map<UUID, User> users = new HashMap<>();
 
 //      emails
@@ -33,8 +32,10 @@ public class DataStorage {
         return emails;
     }
 
-    public FilteredList<Email> getFolderEmails(String folder) {
+    public FilteredList<? extends EmailItem> getFolderEmails(String folder) {
         switch (folder) {
+            case "DRAFTS":
+                return drafts.filtered(d -> true);
             case "ALL":
                 return emails.filtered(e -> true);
             default:
@@ -80,5 +81,29 @@ public class DataStorage {
 
     public void addEmail(Email email) {
         emails.add(email);
+    }
+
+
+    public void addDraft(Draft draft) {
+        this.drafts.add(draft);
+    }
+
+    public void addDrafts(List<Draft> draftList) {
+        this.drafts.addAll(draftList);
+    }
+    public void updateDraft(Draft draft) {
+        var optional = drafts.stream().filter(d -> d.getDraftId() == draft.getDraftId()).findFirst();
+        if (optional.isPresent()) {
+            var ind = this.drafts.indexOf(optional.get());
+            this.drafts.set(ind, optional.get());
+        }
+    }
+
+    public ObservableList<Draft> getDrafts() {
+        return drafts;
+    }
+
+    public void deleteDraft(UUID draftId) {
+        this.drafts.removeIf(d -> d.getDraftId() == draftId);
     }
 }

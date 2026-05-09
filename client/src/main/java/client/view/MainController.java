@@ -1,10 +1,14 @@
 package client.view;
 
 import client.model.Email;
+import client.service.NavigationService;
 import client.viewModel.MainViewModel;
+import common.dto.Draft;
+import common.dto.EmailItem;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -23,17 +27,21 @@ public class MainController {
         this.viewModel = viewModel;
         userLabel.textProperty().bind(Bindings.selectString(viewModel.getCurrentUser(), "username"));
         emailsList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            viewModel.onEmailClicked(((Email) newVal).getEmailId());
+            if (newVal instanceof Email email) {
+                viewModel.onEmailClicked((email).getEmailId());
+            } else if (newVal instanceof Draft draft) {
+                viewModel.onDraftClicked(draft);
+            }
         });
         try {
-            emailsList.setCellFactory(lv -> new ListCell<Email>() {
+            emailsList.setCellFactory(lv -> new ListCell<EmailItem>() {
                 private final VBox root = new VBox();
                 private final HBox row = new HBox();
                 private final Label subject = new Label();
                 private final Label from = new Label();
                 private final Label to = new Label();
-                private final String readStyle = "-fx-text-fill=gray;";
-                private final String newStyle = "-fx-text-fill=steelblue";
+                private final String readStyle = "-fx-text-fill:gray";
+                private final String newStyle = "-fx-text-fill:blue";
 
                 {
                     Region spacer = new Region();
@@ -50,23 +58,30 @@ public class MainController {
                 }
 
                 @Override
-                protected void updateItem(Email email, boolean empty) {
-                    System.out.println("Update email item:" + email);
-                    super.updateItem(email, empty);
+                protected void updateItem(EmailItem item, boolean empty) {
+                    System.out.println("Update email item:" + item);
+                    super.updateItem(item, empty);
 
-                    if (empty || email == null) {
+                    if (empty || item == null) {
                         setGraphic(null);
                     } else {
-                        subject.setText(email.getSubject());
-                        from.setText(email.getSender().getUsername());
-                        to.setText(email.getRecipients().getFirst().getUsername());
-//                    onMouseClickedProperty().addListener( _ -> {
-//                        viewModel.onEmailClicked(email.getEmailId());
-//                    });
-                        if (email.isRead()) {
-                            root.setStyle(readStyle);
-                        } else {
-                            root.setStyle(newStyle);
+                        if (item instanceof Email email) {
+                            subject.setText(email.getSubject());
+                            from.setText(email.getSender().getUsername());
+                            to.setText(email.getRecipients().getFirst().getUsername());
+
+
+                            if (email.isRead()) {
+                                root.setStyle(readStyle);
+                            } else {
+                                root.setStyle(newStyle);
+                            }
+                        } else if (item instanceof Draft draft) {
+                            subject.setText(draft.getSubject());
+                            from.setText("Черновик");
+                            var recipients = draft.getRecipients();
+                            to.setText(recipients.isEmpty() ? "" : recipients.getFirst());
+
                         }
                         setGraphic(root);
                     }
@@ -75,6 +90,7 @@ public class MainController {
 
             var root = tree.getRoot();
             var foldersRoot = new TreeItem<>("Папки");
+            foldersRoot.setExpanded(true);
             var tagsRoot = new TreeItem<>("Теги");
             root.getChildren().addAll(foldersRoot, tagsRoot);
             for (var item : viewModel.getFolderNames().entrySet()) {
@@ -88,7 +104,7 @@ public class MainController {
                                     TreeItem<String> oldItem, TreeItem<String> newItem) {
                     var item = newItem;
                     var t = item.getValue();
-                    emailsList.setItems(viewModel.getFolderEmails(viewModel.getFolderNames().get(t)));
+                    emailsList.setItems((FilteredList<EmailItem>) viewModel.getFolderEmails(viewModel.getFolderNames().get(t)));
                 }
             });
 
@@ -125,7 +141,7 @@ public class MainController {
     private TreeView<String> tree;
 
     @FXML
-    private ListView emailsList;
+    private ListView<EmailItem> emailsList;
 
     public BorderPane getBorderPane() {
         return borderPane;

@@ -152,6 +152,8 @@ public class ClientHandler implements Runnable {
                 case "GetDrafts":
                     getDraftsHandler((GetDraftsRequest) request);
                     break;
+                case "UpdateDraft":
+                    updateDraftsHandler((UpdateDraftRequest) request);
             }
         } catch (Exception e) {
             System.out.println("ClientHandler" + socket.getInetAddress() + " " + e.toString());
@@ -385,8 +387,9 @@ public class ClientHandler implements Runnable {
             );
             var json = jsonMapper.writeValueAsString(response);
             sOut.println(json);
-        } catch (
-                Exception e) {
+            System.out.println("response sent");
+        } catch (Exception e) {
+            System.out.println(e.toString());
             throw new RuntimeException(e);
         }
     }
@@ -404,7 +407,11 @@ public class ClientHandler implements Runnable {
                     "success",
                     draftId.orElseThrow()
             ));
+            sOut.println(jsonResponse);
+            System.out.println("response sent");
+
         } catch (Exception e) {
+            System.out.println(e.toString());
             throw new RuntimeException(e);
         }
     }
@@ -423,7 +430,31 @@ public class ClientHandler implements Runnable {
                     userId,
                     draftList
             ));
+            sOut.println(jsonResponse);
+            System.out.println("response sent");
         } catch (Exception e) {
+            System.out.println(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public void updateDraftsHandler(UpdateDraftRequest request) {
+        var userId = verifyAccessToken(request);
+        if (userId == null) {
+            return;
+        }
+        try {
+            draftService.updateDraft(request.getDraft());
+
+            var jsonResponse = jsonMapper.writeValueAsString(new UpdateDraftResponse(
+                    request.getRequestId(),
+                    "success"
+            ));
+            sOut.println(jsonResponse);
+            System.out.println("response sent");
+        } catch (Exception e) {
+            System.out.println(e.toString());
             throw new RuntimeException(e);
         }
     }

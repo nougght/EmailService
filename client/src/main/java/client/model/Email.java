@@ -4,9 +4,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import common.dto.EmailItem;
 import common.dto.EmailRecipientDTO;
 
-public class Email {
+public class Email implements EmailItem {
     private UUID emailId;
     private UUID senderId;
     private String senderUsername;

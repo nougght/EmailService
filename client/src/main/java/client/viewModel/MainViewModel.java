@@ -7,8 +7,11 @@ import java.util.UUID;
 import client.model.Email;
 import client.model.User;
 import client.service.AuthService;
+import client.service.DraftService;
 import client.service.EmailService;
 import client.service.SessionService;
+import common.dto.Draft;
+import common.dto.EmailItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.transformation.FilteredList;
@@ -19,10 +22,10 @@ public class MainViewModel {
     private final SessionService sessionService;
     private ObjectProperty<User> currentUser;
 
-    private FilteredList<Email> allEmails;
-    private FilteredList<Email> inbox;
-    private FilteredList<Email> outbox;
-    private FilteredList<Email> drafts;
+    private FilteredList<? extends EmailItem> allEmails;
+    private FilteredList<? extends EmailItem> inbox;
+    private FilteredList<? extends EmailItem> outbox;
+    private FilteredList<? extends EmailItem> drafts;
 
 //    private List<FilteredList<Email>> tagEmails;
 
@@ -47,6 +50,7 @@ public class MainViewModel {
     private final ObjectProperty<Object> onLogout = new SimpleObjectProperty<>();
     private final ObjectProperty<UUID> onOpenEmail = new SimpleObjectProperty<>();
     private final ObjectProperty<Object> onNewEmail = new SimpleObjectProperty<>();
+    private final ObjectProperty<Draft> onOpenDraft = new SimpleObjectProperty<Draft>();
 
     public ObjectProperty<Object> getOnLogout() {
         return onLogout;
@@ -60,6 +64,10 @@ public class MainViewModel {
         return onNewEmail;
     }
 
+    public ObjectProperty<Draft> getOnOpenDraft() {
+        return onOpenDraft;
+    }
+
     public ObjectProperty<User> getCurrentUser() {
         return currentUser;
     }
@@ -68,13 +76,13 @@ public class MainViewModel {
         return folderNames;
     }
 
-    public FilteredList<Email> getFolderEmails(String folder) {
+    public FilteredList<? extends EmailItem> getFolderEmails(String folder) {
         switch (folder) {
             case "INBOX":
                 return inbox;
             case "OUTBOX":
                 return outbox;
-            case "DRAFT":
+            case "DRAFTS":
                 return drafts;
             case "ALL":
                 return allEmails;
@@ -103,5 +111,9 @@ public class MainViewModel {
         System.out.println("onNewEmailClicked");
 
         onNewEmail.set(new Object());
+    }
+
+    public void onDraftClicked(Draft draft) {
+        onOpenDraft.set(draft);
     }
 }

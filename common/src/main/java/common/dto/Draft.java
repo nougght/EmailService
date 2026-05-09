@@ -4,7 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public class Draft {
+public class Draft implements EmailItem{
     private UUID draftId;
     private UUID senderId;
     private List<String> recipients;
@@ -32,6 +32,7 @@ public class Draft {
     public UUID getSenderId() {
         return senderId;
     }
+
 
     public String getBody() {
         return body;
