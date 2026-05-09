@@ -2,16 +2,11 @@ package common.network.request;
 
 import java.util.UUID;
 
-
-public class GetEmailsRequest extends Request {
+public class GetDraftsRequest extends Request{
     private UUID userId;
-
-    public GetEmailsRequest() {
-        super();
-    }
-
-    public GetEmailsRequest(UUID userId) {
-        super("GetEmails");
+    public GetDraftsRequest() {super();}
+    public GetDraftsRequest(UUID userId) {
+        super("GetDrafts");
         this.userId = userId;
     }
 

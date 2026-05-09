@@ -1,6 +1,5 @@
 package client.mapper;
 
-
 import client.model.Email;
 import common.dto.EmailDTO;
 
@@ -16,7 +15,8 @@ public class EmailMapper {
                 dto.getSentAt(),
                 null,
                 dto.getRecipients(),
-                null
+                dto.getFolder(),
+                dto.isRead()
         );
     }
 }

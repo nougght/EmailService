@@ -1,6 +1,5 @@
 package common.network.request;
 
-
 public class LoginRequest extends Request{
     private String username;
     private String password;
@@ -31,6 +30,5 @@ public class LoginRequest extends Request{
     public void setPassword(String password) {
         this.password = password;
     }
-
 
 }

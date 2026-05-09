@@ -1,25 +1,28 @@
 package client.network;
 
-import common.dto.EmailDTO;
-import client.model.Email;
-import common.network.message.Message;
-import common.network.message.MessageDeserializer;
-import common.network.notification.NewEmailNotification;
-import common.network.notification.Notification;
-import common.network.request.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import common.network.response.Response;
-
-import javax.net.ssl.SSLSocket;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import javax.net.ssl.SSLSocket;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import common.dto.EmailDTO;
+import common.network.message.Message;
+import common.network.message.MessageDeserializer;
+import common.network.notification.Notification;
+import common.network.response.Response;
 
 // прослушивание запросов и ответов от сервера в отдельном потоке
 public class TcpListener extends Thread{
@@ -130,7 +133,6 @@ public class TcpListener extends Thread{
         System.out.println("response with id " + id + " complete");
         future.complete(response);
     }
-
 
     public void newEmailHandler(EmailDTO email)
     {

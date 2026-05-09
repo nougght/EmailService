@@ -15,15 +15,20 @@ public class EmailDTO {
     private String body;
     private OffsetDateTime sentAt;
 
+    private String folder;
+    private boolean isRead;
+
     public EmailDTO(){}
     public EmailDTO(UUID email_id, UUID sender_id, List<EmailRecipientDTO> recipients,
-                    String subject, String body, OffsetDateTime sent_at) {
+                    String subject, String body, OffsetDateTime sent_at, String folder, boolean isRead) {
         this.emailId = email_id;
         this.senderId = sender_id;
         this.recipients = recipients;
         this.subject = subject;
         this.body = body;
         this.sentAt = sent_at;
+        this.folder = folder;
+        this.isRead = isRead;
     }
 
     public UUID getEmailId() {
@@ -54,6 +59,14 @@ public class EmailDTO {
         return sentAt;
     }
 
+    public String getFolder() {
+        return folder;
+    }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
     public void setEmailId(UUID emailId) {
         this.emailId = emailId;
     }
@@ -80,5 +93,13 @@ public class EmailDTO {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public void setFolder(String folder) {
+        this.folder = folder;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
     }
 }

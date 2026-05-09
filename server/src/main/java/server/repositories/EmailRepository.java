@@ -51,10 +51,25 @@ public class EmailRepository {
 //                                rows.getString("sender_email"),
 //                                rows.getObject("sender_created_at", OffsetDateTime.class)
                         ),
+                        null,
                         null
                 );
-                var recipientIds = (UUID[])rows.getArray("recipient_ids").getArray();
-                var recipientUsernames = (String[])rows.getArray("recipient_usernames").getArray();
+                PreparedStatement detailsQuery = con.prepareStatement("""
+                        SELECT folder, is_read FROM user_emails
+                        WHERE email_id = ? AND user_id = ?
+                        """);
+                detailsQuery.setObject(1, email.getEmailId());
+                detailsQuery.setObject(2, userId);
+                var detailsRows = detailsQuery.executeQuery();
+                if (detailsRows.next()) {
+                    email.setDetails(new UserEmail(
+                            userId,
+                            detailsRows.getString("folder"),
+                            detailsRows.getBoolean("is_read")));
+                }
+
+                var recipientIds = (UUID[]) rows.getArray("recipient_ids").getArray();
+                var recipientUsernames = (String[]) rows.getArray("recipient_usernames").getArray();
                 var recipients = new ArrayList<EmailRecipient>(recipientIds.length);
 
                 for (int i = 0; i < recipientIds.length; i++) {
@@ -97,24 +112,62 @@ public class EmailRepository {
                 UUID email_id = null;
                 if (rows.next()) {
                     email_id = rows.getObject("email_id", UUID.class);
-                    PreparedStatement ins = con.prepareStatement("""
-                            INSERT INTO email_recipients(email_id, username, user_id)
-                            SELECT ?, ?, user_id
-                            FROM users
-                            WHERE users.username = ?
-                            """);
 
-                    for (int i = 0; i < email.getRecipients().size(); i++){
-                        var username = email.getRecipients().get(i).getUsername();
-                        ins.setObject(1, email_id);
-                        ins.setString(2, username);
-                        ins.setString(3, username);
-                        ins.addBatch();
+                    PreparedStatement idsQuery = con.prepareStatement("""
+                            SELECT user_id FROM users
+                            WHERE users.username = ANY(?)
+                            """);
+                    idsQuery.setArray(1, con.createArrayOf("varchar", email.getRecipients().stream().map(EmailRecipient::getUsername).toArray()));
+                    rows = idsQuery.executeQuery();
+                    var ids = new ArrayList<UUID>();
+                    while (rows.next()) {
+                        ids.add(rows.getObject("user_id", UUID.class));
                     }
-                    ins.executeBatch();
+
+                    // добавляем получателей в бд
+                    PreparedStatement insRecipients = con.prepareStatement("""
+                            INSERT INTO email_recipients(email_id, username, user_id)
+                            VALUES (?, ?, ?)
+                            """);
+                    //                            SELECT ?, ?, user_id
+                    //                            FROM users
+                    //                            WHERE users.username = ?
+                    //                            """);
+
+                    for (int i = 0; i < email.getRecipients().size(); i++) {
+                        var username = email.getRecipients().get(i).getUsername();
+                        insRecipients.setObject(1, email_id);
+                        insRecipients.setString(2, username);
+                        insRecipients.setObject(3, ids.get(i));
+                        insRecipients.addBatch();
+                    }
+                    insRecipients.executeBatch();
+
+                    // добавляем письмо в дополнительную таблицу
+                    PreparedStatement insUserEmails = con.prepareStatement("""
+                            INSERT INTO user_emails(user_id, email_id, folder, is_read)
+                            VALUES (?, ?, ?, ?)
+                            """);
+                    // для отправителя
+                    insUserEmails.setObject(1, email.getSenderId().orElseThrow());
+                    insUserEmails.setObject(2, email_id);
+                    insUserEmails.setString(3, "OUTBOX");
+                    insUserEmails.setBoolean(4, true);
+                    insUserEmails.addBatch();
+
+                    for (var i = 0; i < email.getRecipients().size(); i++) {
+                        insUserEmails.setObject(1, ids.get(i));
+                        insUserEmails.setObject(2, email_id);
+                        insUserEmails.setString(3, "INBOX");
+                        insUserEmails.setBoolean(4, false);
+                        insUserEmails.addBatch();
+                    }
+                    var lst = insUserEmails.executeBatch();
+
                     con.commit();
-                    return  Optional.of(email_id);
+                    return Optional.of(email_id);
                 }
+
 
             } catch (SQLException e) {
                 con.rollback();
@@ -127,10 +180,10 @@ public class EmailRepository {
         return Optional.<UUID>empty();
     }
 
-
-    public Optional<Email> getEmail(UUID emailId) {
+    public Optional<Email> getEmail(UUID emailId, UUID userId) {
+        var con = DatabaseManager.getConnection();
         try {
-            var con = DatabaseManager.getConnection();
+            con.setAutoCommit(false);
             var st = con.prepareStatement("""
                     SELECT emails.email_id, sender_id, subject, body, sent_at,
                     sender.username as sender_username,
@@ -168,10 +221,27 @@ public class EmailRepository {
 //                                rows.getString("sender_email"),
 //                                rows.getObject("sender_created_at", OffsetDateTime.class)
                         ),
+                        null,
                         null
+
                 );
-                var recipientIds = (UUID[])rows.getArray("recipient_ids").getArray();
-                var recipientUsernames = (String[])rows.getArray("recipient_usernames").getArray();
+                if (userId != null) {
+                    PreparedStatement detailsQuery = con.prepareStatement("""
+                            SELECT folder, is_read FROM user_emails
+                            WHERE email_id = ? AND user_id = ?
+                            """);
+                    detailsQuery.setObject(1, emailId);
+                    detailsQuery.setObject(2, userId);
+                    var detailsRows = detailsQuery.executeQuery();
+                    if (detailsRows.next()) {
+                        email.setDetails(new UserEmail(
+                                userId,
+                                detailsRows.getString("folder"),
+                                detailsRows.getBoolean("is_read")));
+                    }
+                }
+                var recipientIds = (UUID[]) rows.getArray("recipient_ids").getArray();
+                var recipientUsernames = (String[]) rows.getArray("recipient_usernames").getArray();
                 var recipients = new ArrayList<EmailRecipient>(recipientIds.length);
 
                 for (int i = 0; i < recipientIds.length; i++) {
@@ -179,11 +249,18 @@ public class EmailRepository {
                     recipients.add(r);
                 }
                 email.setRecipients(recipients);
+
+                con.commit();
                 return Optional.of(email);
             }
 
         } catch (Exception e) {
             System.out.println(e.toString());
+            try {
+                con.rollback();
+            } catch (Exception ex) {
+                System.out.println(ex.toString());
+            }
         }
         return Optional.<Email>empty();
     }

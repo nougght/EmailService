@@ -3,12 +3,14 @@ package server.repositories;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import server.database.DatabaseManager;
 import server.model.User;
-
-import javax.xml.crypto.Data;
 
 public class UserRepository {
 
@@ -28,7 +30,6 @@ public class UserRepository {
         }
         return false;
     }
-
 
     public Optional<User> getUserByUsername(String username) {
         var con = DatabaseManager.getConnection();

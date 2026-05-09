@@ -1,16 +1,20 @@
 package client.storage;
 
-import client.model.Email;
-import client.model.User;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 import java.util.*;
 import java.util.stream.Collectors;
+
+import client.model.Email;
+import client.model.User;
+import common.dto.Draft;
+import common.dto.EmailItem;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 // хранилище, предоставляющее доступ к данным, но без логики обработки
 public class DataStorage {
     final private ObservableList<Email> emails = FXCollections.observableArrayList();
+    final private ObservableList<Draft> drafts = FXCollections.observableArrayList();
     final private Map<UUID, User> users = new HashMap<>();
 
 //      emails
@@ -26,6 +30,21 @@ public class DataStorage {
 
     public ObservableList<Email> getAllEmails() {
         return emails;
+    }
+
+    public FilteredList<? extends EmailItem> getFolderEmails(String folder) {
+        switch (folder) {
+            case "DRAFTS":
+                return drafts.filtered(d -> true);
+            case "ALL":
+                return emails.filtered(e -> true);
+            default:
+                return emails.filtered(e -> e.getFolder().equals(folder));
+        }
+    }
+
+    public FilteredList<Email> getTagEmails(String tag) {
+        return null;
     }
 
 //    public ArrayList<Email> getEmailsByReceiverId(UUID receiverId) {
@@ -48,22 +67,43 @@ public class DataStorage {
 //        return users.stream().filter(u -> u.getUsername().equals(username)).findFirst();
 //    }
 
-
     public void addUser(User user) {
         users.put(user.getUserId(), user);
     }
 
-
-    public void addUsers(Map<UUID, User> users){
+    public void addUsers(Map<UUID, User> users) {
         this.users.putAll(users);
     }
 
-    public boolean containsUserWithId(UUID id){
+    public boolean containsUserWithId(UUID id) {
         return users.containsKey(id);
     }
 
-
     public void addEmail(Email email) {
         emails.add(email);
+    }
+
+
+    public void addDraft(Draft draft) {
+        this.drafts.add(draft);
+    }
+
+    public void addDrafts(List<Draft> draftList) {
+        this.drafts.addAll(draftList);
+    }
+    public void updateDraft(Draft draft) {
+        var optional = drafts.stream().filter(d -> d.getDraftId() == draft.getDraftId()).findFirst();
+        if (optional.isPresent()) {
+            var ind = this.drafts.indexOf(optional.get());
+            this.drafts.set(ind, optional.get());
+        }
+    }
+
+    public ObservableList<Draft> getDrafts() {
+        return drafts;
+    }
+
+    public void deleteDraft(UUID draftId) {
+        this.drafts.removeIf(d -> d.getDraftId() == draftId);
     }
 }

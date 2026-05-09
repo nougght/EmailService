@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.HexFormat;
 import java.util.UUID;
 
-
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -47,7 +46,6 @@ public class AuthService {
     public boolean checkPassword(String password, String hash) {
         return passwordEncoder.matches(password, hash);
     }
-
 
     public Pair<User, String> register(String username, String password) {
         if (userRepository.checkUserExisting(username))
@@ -149,6 +147,5 @@ public class AuthService {
             throw new RuntimeException(e);
         }
     }
-
 
 }

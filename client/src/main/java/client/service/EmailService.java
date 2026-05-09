@@ -5,13 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import common.dto.EmailDTO;
-import common.dto.EmailRecipientDTO;
-import common.dto.UserDTO;
 import client.mapper.EmailMapper;
 import client.mapper.UserMapper;
 import client.model.Email;
@@ -19,8 +15,13 @@ import client.model.EmailSending;
 import client.model.User;
 import client.network.TcpClient;
 import client.storage.DataStorage;
+import common.dto.EmailDTO;
+import common.dto.EmailItem;
+import common.dto.EmailRecipientDTO;
+import common.dto.UserDTO;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 public class EmailService {
     final private TcpClient tcpClient;
@@ -65,9 +66,16 @@ public class EmailService {
         return existing;
     }
 
-
     public ObservableList<Email> getEmailsList() {
         return storage.getAllEmails();
+    }
+
+    public FilteredList<? extends EmailItem> getFolderEmails(String folder) {
+        return storage.getFolderEmails(folder);
+    }
+
+    public FilteredList<Email> getTagEmails(String tag) {
+        return storage.getTagEmails(tag);
     }
 
     public void loadUserEmails(UUID userId) {
@@ -90,25 +98,13 @@ public class EmailService {
             Platform.runLater(() -> storage.setAllEmails(emails));
         });
 
-//                .thenCompose(lst -> {
-//                    // to do: ограничить параллельную работу convert из-за возможной перегрузки
-//                    var emails = lst.stream().map(e -> convert(e)).collect(Collectors.toCollection(ArrayList::new));
-//                    return CompletableFuture.allOf(emails.toArray(new CompletableFuture[0])).
-//                            thenApply(
-//                                    v -> {
-//                                        return emails.stream().map(e -> e.join()).collect(Collectors.toCollection(ArrayList::new));
-//
-//                                    }
-//                            );
-//                }
-//        )
 
     }
 
     public CompletableFuture<Integer> loadUsers(List<UUID> ids) {
         if (ids.isEmpty()) return CompletableFuture.completedFuture(0);
         for (var i = 0; i < ids.size(); ) {
-            if (!storage.containsUserWithId(ids.get(i))) {
+            if (storage.containsUserWithId(ids.get(i))) {
                 ids.remove(i);
             } else {
                 i++;
@@ -122,19 +118,6 @@ public class EmailService {
         });
     }
 
-//    public CompletableFuture<ArrayList<Email>> loadUserEmails(UUID userId) {
-//
-//        return tcpClient.requestAllUserEmails(userId).thenCompose(lst -> {
-//                    // to do: ограничить параллельную работу convert из-за возможной перегрузки
-//                    var emails = lst.stream().map(e -> convert(e)).collect(Collectors.toCollection(ArrayList::new));
-//                    return CompletableFuture.allOf(emails.toArray(new CompletableFuture[0])).thenApply(
-//                            v -> {
-//                                return emails.stream().map(e -> e.join()).collect(Collectors.toCollection(ArrayList::new));
-//                            }
-//                    );
-//                }
-//        );
-//    }
 
     public CompletableFuture<Optional<Email>> sendEmail(EmailSending email) {
         return tcpClient.requestSendEmail(email).thenCompose(optionalDto -> {
@@ -190,6 +173,5 @@ public class EmailService {
 //                return email;
 //            });
 //        }
-
 
 }

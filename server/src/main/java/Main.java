@@ -4,13 +4,14 @@
 
 import io.github.cdimascio.dotenv.Dotenv;
 import server.database.DatabaseManager;
+import server.network.TcpServer;
+import server.repositories.DraftRepository;
 import server.repositories.EmailRepository;
-//import server.network.TestServer;
 import server.repositories.TokenRepository;
 import server.repositories.UserRepository;
 import server.services.AuthService;
+import server.services.DraftService;
 import server.services.EmailService;
-import server.network.TcpServer;
 import server.services.UserService;
 
 public class Main {
@@ -26,12 +27,13 @@ public class Main {
         EmailRepository emailRepo = new EmailRepository();
         UserRepository userRepo = new UserRepository();
         TokenRepository tokenRepo = new TokenRepository();
+        DraftRepository draftRepo = new DraftRepository();
         AuthService authService = new AuthService(userRepo, tokenRepo, dotenv.get("JWT_SECRET_KEY"));
-        EmailService emailService = new EmailService(emailRepo);
+        DraftService draftService = new DraftService(draftRepo);
+        EmailService emailService = new EmailService(emailRepo, draftService);
         UserService userService = new UserService(userRepo);
 
-
-        new TcpServer(3741, authService, emailService, userService);
+        new TcpServer(3741, authService, draftService, emailService, userService);
     }
 }
 

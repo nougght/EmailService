@@ -1,12 +1,13 @@
 package client.model;
 
-import common.dto.EmailRecipientDTO;
-
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public class Email {
+import common.dto.EmailItem;
+import common.dto.EmailRecipientDTO;
+
+public class Email implements EmailItem {
     private UUID emailId;
     private UUID senderId;
     private String senderUsername;
@@ -17,11 +18,12 @@ public class Email {
     private User sender;
     private List<EmailRecipientDTO> recipients;
 
-    private String type;
+    private String folder;
+    private boolean isRead;
 
     public Email(UUID email_id, UUID sender_id, String senderUsername,
                  String subject, String body, OffsetDateTime sent_at, User sender, List<EmailRecipientDTO> recipients,
-                 String type) {
+                 String folder, boolean isRead) {
         this.emailId = email_id;
         this.senderId = sender_id;
         this.senderUsername = senderUsername;
@@ -30,7 +32,8 @@ public class Email {
         this.sentAt = sent_at;
         this.sender = sender;
         this.recipients = recipients;
-        this.type = type;
+        this.folder = folder;
+        this.isRead = isRead;
     }
 
     public UUID getEmailId() {
@@ -65,8 +68,12 @@ public class Email {
         return recipients;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public String getFolder() {
+        return folder;
+    }
+
+    public boolean isRead() {
+        return isRead;
     }
 
     public void setSender(User sender) {
@@ -83,13 +90,13 @@ public class Email {
         this.senderUsername = senderUsername;
     }
 
-    public Boolean isInbox() {
-        return type.equals("inbox");
-    }
-    public Boolean isOutbox(){
-        return type.equals("outbox");
-    }
+//    // TEMP
+//    public Boolean isInbox() {
+//        return true;
+//    }
+//    public Boolean isOutbox(){
+//        return false;
+//    }
 
 }
-
 

@@ -1,9 +1,8 @@
 package common.network.response;
 
+import java.util.UUID;
 
 import common.dto.UserDTO;
-
-import java.util.UUID;
 
 public class LoginResponse extends Response{
     private UserDTO user;

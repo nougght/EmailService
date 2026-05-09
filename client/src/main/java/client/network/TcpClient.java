@@ -1,5 +1,6 @@
 package client.network;
 
+import common.dto.Draft;
 import common.dto.EmailDTO;
 import common.dto.UserDTO;
 import client.model.AuthResult;
@@ -101,7 +102,6 @@ public class TcpClient extends Thread {
         }
     }
 
-
     public CompletableFuture<AuthResult> requestRegistration(String username, String password) {
         try {
             var request = new RegistrationRequest(username, password);
@@ -183,17 +183,7 @@ public class TcpClient extends Thread {
                     .exceptionally(ex -> {
                         throw new RuntimeException(ex.toString());
                     });
-//            sOut.println(jsonRequest);
-//            String response = "";
-////                    sIn.readLine();
-////            System.out.println("response: " + response);
-////            GetUserResponse getUserResponse = jsonMapper.readValue(response, GetUserResponse.class);
-////            if (getUserResponse.getStatus().equals("success")) {
-////                return Optional.ofNullable(getUserResponse.getUserDTO());
-////            } else {
-//            return Optional.empty();
-////            }
-//
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -243,7 +233,7 @@ public class TcpClient extends Thread {
                     return new HashMap<>();
                 }
             });
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -254,7 +244,8 @@ public class TcpClient extends Thread {
                     emailSending.getSenderId(),
                     emailSending.getRecipientUsernames(),
                     emailSending.getSubject(),
-                    emailSending.getBody()
+                    emailSending.getBody(),
+                    emailSending.getDraftId()
             );
             request.setAccessToken(accessToken);
 
@@ -275,13 +266,64 @@ public class TcpClient extends Thread {
         }
     }
 
-    //    public CompletableFuture<Optional<Email>> requestEmailByEmailId(UUID emailId){
-//        try {
-//            var request = new
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+    public CompletableFuture<List<Draft>> requestUserDrafts(UUID userId) {
+        try {
+            var request = new GetDraftsRequest(userId);
+            request.setAccessToken(accessToken);
+            var future = new CompletableFuture<Response>();
+
+            var jsonRequest = jsonMapper.writeValueAsString(request);
+
+            pendingResponses.put(request.getRequestId(), future);
+            requests.put(jsonRequest);
+            return future.thenApply(resp -> {
+                var response = (GetDraftsResponse) resp;
+                return response.getDrafts();
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public CompletableFuture<UUID> requestAddDraft(Draft draft) {
+        try {
+            var request = new AddDraftRequest(draft);
+            request.setAccessToken(accessToken);
+            var future = new CompletableFuture<Response>();
+
+            var jsonRequest = jsonMapper.writeValueAsString(request);
+
+            pendingResponses.put(request.getRequestId(), future);
+            requests.put(jsonRequest);
+            return future.thenApply(resp -> {
+                var response = (AddDraftResponse) resp;
+                return response.getDraftId();
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public CompletableFuture<Boolean> requestDraftUpdate(Draft draft) {
+        try {
+            var request = new UpdateDraftRequest(draft);
+            request.setAccessToken(accessToken);
+            var future = new CompletableFuture<Response>();
+
+            var jsonRequest = jsonMapper.writeValueAsString(request);
+
+            pendingResponses.put(request.getRequestId(), future);
+            requests.put(jsonRequest);
+            return future.thenApply(resp -> {
+                var response = (UpdateDraftResponse) resp;
+                return response.getStatus().equals("success");
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     public CompletableFuture<AuthResult> requestAutoAuth(String refreshToken, UUID userId) {
         try {
             var request = new RefreshRequest(userId, refreshToken);

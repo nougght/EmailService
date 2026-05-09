@@ -23,7 +23,6 @@ public abstract class Response extends Message {
         this.requestId = requestId;
     }
 
-
     public void setStatus(String status) {
         this.status = status;
     }

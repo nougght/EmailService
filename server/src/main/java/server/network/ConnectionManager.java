@@ -31,7 +31,6 @@ public class ConnectionManager {
         }
     }
 
-
     public ArrayList<ClientHandler> getClient(UUID userId) {
         return clients.get(userId);
     }

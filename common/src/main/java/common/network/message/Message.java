@@ -1,6 +1,5 @@
 package common.network.message;
 
-
 public abstract class Message {
     // тип сосбщения (request, response, notification)
     private String kind;

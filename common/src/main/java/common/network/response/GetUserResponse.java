@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import common.dto.UserDTO;
 
-
 public class GetUserResponse extends Response {
     private UserDTO userDTO;
 

@@ -1,6 +1,5 @@
 package server.mapper;
 
-
 import common.dto.UserDTO;
 import server.model.User;
 

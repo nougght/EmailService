@@ -5,13 +5,12 @@ import common.dto.EmailRecipientDTO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import  javafx.scene.control.ListView;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import  javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
-
 
 public class EmailController {
     private EmailViewModel viewModel;
@@ -62,7 +61,6 @@ public class EmailController {
 
     @FXML
     private Label bodyLabel;
-
 
     @FXML
     private Button replyButton;

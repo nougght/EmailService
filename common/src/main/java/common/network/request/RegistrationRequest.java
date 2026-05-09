@@ -31,5 +31,4 @@ public class RegistrationRequest extends Request{
         this.password = password;
     }
 
-
 }
