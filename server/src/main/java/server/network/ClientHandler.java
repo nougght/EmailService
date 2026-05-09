@@ -24,23 +24,8 @@ import common.network.message.Message;
 import common.network.message.MessageDeserializer;
 import common.network.notification.NewEmailNotification;
 import common.network.notification.Notification;
-import common.network.request.GetEmailsRequest;
-import common.network.request.GetUserRequest;
-import common.network.request.GetUsersRequest;
-import common.network.request.LoginRequest;
-import common.network.request.LogoutRequest;
-import common.network.request.RefreshRequest;
-import common.network.request.RegistrationRequest;
-import common.network.request.Request;
-import common.network.request.SendEmailRequest;
-import common.network.response.GetEmailsResponse;
-import common.network.response.GetUserResponse;
-import common.network.response.GetUsersResponse;
-import common.network.response.LoginResponse;
-import common.network.response.LogoutResponse;
-import common.network.response.RefreshResponse;
-import common.network.response.RegistrationResponse;
-import common.network.response.SendEmailResponse;
+import common.network.request.*;
+import common.network.response.*;
 import server.mapper.EmailMapper;
 import server.mapper.UserMapper;
 import server.model.Email;
@@ -48,6 +33,7 @@ import server.model.EmailRecipient;
 import server.model.User;
 import server.model.UserEmail;
 import server.services.AuthService;
+import server.services.DraftService;
 import server.services.EmailService;
 import server.services.UserService;
 
@@ -57,6 +43,7 @@ public class ClientHandler implements Runnable {
     private BufferedReader sIn = null;
     private PrintWriter sOut = null;
     private final AuthService authService;
+    private final DraftService draftService;
     private final EmailService emailService;
     private final UserService userService;
     private final ObjectMapper jsonMapper = new ObjectMapper();
@@ -65,9 +52,10 @@ public class ClientHandler implements Runnable {
     private final ConnectionManager connectionManager;
     private UUID userId;
 
-    ClientHandler(Socket socket, AuthService authService, EmailService emailService, UserService userService, ConnectionManager connectionManager) {
+    ClientHandler(Socket socket, AuthService authService, DraftService draftService, EmailService emailService, UserService userService, ConnectionManager connectionManager) {
         this.socket = socket;
         this.authService = authService;
+        this.draftService = draftService;
         this.emailService = emailService;
         this.userService = userService;
         this.connectionManager = connectionManager;
@@ -158,15 +146,24 @@ public class ClientHandler implements Runnable {
                 case "SendEmail":
                     sendEmailHandler((SendEmailRequest) request);
                     break;
+                case "AddDraft":
+                    addDraftHandler((AddDraftRequest) request);
+                    break;
+                case "GetDrafts":
+                    getDraftsHandler((GetDraftsRequest) request);
+                    break;
             }
         } catch (Exception e) {
             System.out.println("ClientHandler" + socket.getInetAddress() + " " + e.toString());
         }
+    }
 
+    private UUID verifyAccessToken(Request request) {
+        return authService.verifyAccessToken(request.getAccessToken());
     }
 
     private void logoutHandler(LogoutRequest request) {
-        UUID userId = authService.verifyAccessToken(request.getAccessToken());
+        var userId = verifyAccessToken(request);
         if (userId == null)
             return;
 
@@ -187,22 +184,11 @@ public class ClientHandler implements Runnable {
     public void getEmailsHandler(GetEmailsRequest request) {
         System.out.println("getEmails Handler");
 //        проверка токена доступа
-        UUID userId = authService.verifyAccessToken(request.getAccessToken());
+        var userId = verifyAccessToken(request);
         if (userId == null)
             return;
         var emails = emailService.getUserEmails(request.getUserId());
 
-//            var data = new JSONArray();
-//            for (var email : emails) {
-//                var emailJson = new JSONObject();
-//                emailJson.put("id", email.getEmailId().toString());
-//                emailJson.put("from", email.getEmailId().toString());
-//                emailJson.put("to", email.receiver_id.toString());
-//                emailJson.put("subject", email.subject);
-//                emailJson.put("body", email.body);
-//                data.put(emailJson);
-//            }
-//            sOut.println("ok");
         var emailDtos = emails.stream().map(EmailMapper::toDTO).collect(Collectors.
                 toCollection(ArrayList::new));
 
@@ -219,7 +205,7 @@ public class ClientHandler implements Runnable {
 
     public void getUserHandler(GetUserRequest request) {
 //        проверка токена доступа
-        UUID userId = authService.verifyAccessToken(request.getAccessToken());
+        var userId = verifyAccessToken(request);
         if (userId == null)
             return;
 
@@ -240,7 +226,7 @@ public class ClientHandler implements Runnable {
 
     public void getUsersHandler(GetUsersRequest request) {
 //        проверка токена доступа
-        UUID userId = authService.verifyAccessToken(request.getAccessToken());
+        var userId = verifyAccessToken(request);
         if (userId == null)
             return;
         try {
@@ -345,7 +331,7 @@ public class ClientHandler implements Runnable {
     }
 
     public void sendEmailHandler(SendEmailRequest request) {
-        UUID userId = authService.verifyAccessToken(request.getAccessToken());
+        var userId = verifyAccessToken(request);
         if (userId == null)
             return;
         try {
@@ -372,7 +358,7 @@ public class ClientHandler implements Runnable {
                     null,
                     recipients,
                     null
-            ), userId);
+            ), userId, request.getDraftId());
 
             if (optionalEmail.isPresent()) {
                 status = "success";
@@ -401,6 +387,43 @@ public class ClientHandler implements Runnable {
             sOut.println(json);
         } catch (
                 Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addDraftHandler(AddDraftRequest request) {
+        var userId = verifyAccessToken(request);
+        if (userId == null) {
+            return;
+        }
+        try {
+            var draftId = draftService.addDraft(request.getDraft());
+
+            var jsonResponse = jsonMapper.writeValueAsString(new AddDraftResponse(
+                    request.getRequestId(),
+                    "success",
+                    draftId.orElseThrow()
+            ));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void getDraftsHandler(GetDraftsRequest request) {
+        var userId = verifyAccessToken(request);
+        if (userId == null) {
+            return;
+        }
+        try {
+            var draftList = draftService.getDrafts(request.getUserId());
+
+            var jsonResponse = jsonMapper.writeValueAsString(new GetDraftsResponse(
+                    request.getRequestId(),
+                    "success",
+                    userId,
+                    draftList
+            ));
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
