@@ -323,6 +323,43 @@ public class TcpClient extends Thread {
         }
     }
 
+    public CompletableFuture<Boolean> requestDeleteUserEmail(UUID userId, UUID emailId) {
+        try {
+            var request = new DeleteUserEmailRequest(userId, emailId);
+            request.setAccessToken(accessToken);
+            var future = new CompletableFuture<Response>();
+
+            var jsonRequest = jsonMapper.writeValueAsString(request);
+
+            pendingResponses.put(request.getRequestId(), future);
+            requests.put(jsonRequest);
+            return future.thenApply(resp -> {
+                var response = (DeleteUserEmailResponse) resp;
+                return response.getStatus().equals("success");
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public CompletableFuture<Boolean> requestDeleteDraft(UUID draftId) {
+        try {
+            var request = new DeleteDraftRequest(draftId);
+            request.setAccessToken(accessToken);
+            var future = new CompletableFuture<Response>();
+
+            var jsonRequest = jsonMapper.writeValueAsString(request);
+
+            pendingResponses.put(request.getRequestId(), future);
+            requests.put(jsonRequest);
+            return future.thenApply(resp -> {
+                var response = (DeleteDraftResponse) resp;
+                return response.getStatus().equals("success");
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public CompletableFuture<AuthResult> requestAutoAuth(String refreshToken, UUID userId) {
         try {

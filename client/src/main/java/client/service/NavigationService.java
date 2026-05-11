@@ -17,6 +17,7 @@ import org.javatuples.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -31,6 +32,7 @@ public class NavigationService {
 
     private final Stage mainStage;
     private final ArrayList<Stage> windows = new ArrayList<>();
+    private final Map<UUID, Stage> newEmailWindows = new HashMap<>();
     private final ChangeListener<Object> onNewEmailListener = (_, _, _) -> {
         System.out.println("OnNewEmail Listener");
         addNewEmailWindow(null);
@@ -55,6 +57,7 @@ public NavigationService(AuthService authService, SessionService sessionService,
 //        scene.getStylesheets().add(getClass().getResource("/client/styles/base.css").toExternalForm());
     mainStage.setTitle("Email Service");
     mainStage.setScene(scene);
+
 }
 
 public Pair<Parent, Object> getOrCreateView(String name) {
@@ -121,7 +124,7 @@ public void goToMainPage() {
         MainController controller = (MainController) pair.getValue1();
         splitPane = controller.getSplitPane();
         if (controller != null) {
-            var vm = new MainViewModel(authService, emailService, sessionService);
+            var vm = new MainViewModel(authService, emailService, draftService, sessionService);
             vm.getOnNewEmail().addListener(onNewEmailListener);
             vm.getOnOpenDraft().addListener(onOpenDraftListener);
             vm.getOnOpenEmail().addListener((ObservableValue<? extends UUID> obs, UUID old, UUID id) -> {
@@ -131,6 +134,9 @@ public void goToMainPage() {
                 Platform.runLater(() -> {
                     goToLoginPage();
                 });
+            });
+            vm.getOnDraftDelete().addListener((o, ov, nv) -> {
+                closeNewEmailWindow(nv);
             });
             controller.setViewModel(vm);
         }
@@ -160,8 +166,18 @@ public void showEmailView(UUID emailId) {
     }
 }
 
+public void closeNewEmailWindow(UUID draftId) {
+    var stage = newEmailWindows.get(draftId);
+    windows.remove(stage);
+    newEmailWindows.remove(draftId);
+    stage.close();
+}
+
 public void addNewEmailWindow(Draft newDraft) {
     try {
+        if (newDraft != null && newEmailWindows.containsKey(newDraft.getDraftId())){
+            return;
+        }
         System.out.println("addNewEmailWindow");
         Stage stage = new Stage();
         stage.initOwner(mainStage);
@@ -174,17 +190,22 @@ public void addNewEmailWindow(Draft newDraft) {
             EmailFormViewModel vm = new EmailFormViewModel(emailService, draftService, sessionService, draft);
 
             vm.getOnEmailSent().addListener((obj) -> {
-                stage.close();
+                closeNewEmailWindow(draft.getDraftId());
             });
+
             stage.onCloseRequestProperty().addListener(_ -> {
                 vm.saveDraft();
-                windows.remove(stage);
+                closeNewEmailWindow(draft.getDraftId());
             });
+
             contr.setViewModel(vm);
 
             Scene scene = new Scene(emailFormView);
             stage.setScene(scene);
             windows.add(stage);
+            newEmailWindows.put(draft.getDraftId(), stage);
+            stage.setY(mainStage.getY() + 200);
+            stage.setX(mainStage.getX() + mainStage.getWidth() / 2 - 150);
             stage.show();
             stage.focusedProperty().addListener((obs, oldValue, newValue) -> {
                 if (!newValue) {

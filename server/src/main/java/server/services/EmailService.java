@@ -36,4 +36,9 @@ public class EmailService {
     public Optional<Email> getEmail(UUID emailId, UUID userId) {
         return emailRepo.getEmail(emailId, userId);
     }
+
+    public void deleteUserEmail(UUID userId, UUID emailId) {
+        emailRepo.deleteUserEmail(userId, emailId);
+    }
+
 }

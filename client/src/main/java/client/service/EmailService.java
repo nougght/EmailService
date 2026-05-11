@@ -15,10 +15,7 @@ import client.model.EmailSending;
 import client.model.User;
 import client.network.TcpClient;
 import client.storage.DataStorage;
-import common.dto.EmailDTO;
-import common.dto.EmailItem;
-import common.dto.EmailRecipientDTO;
-import common.dto.UserDTO;
+import common.dto.*;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -74,6 +71,14 @@ public class EmailService {
         return storage.getFolderEmails(folder);
     }
 
+    public FilteredList<? extends EmailItem> getDrafts() {
+        return storage.getDraftsFiltered();
+    }
+
+    public FilteredList<? extends EmailItem> getEmails() {
+        return storage.getEmailsFiltered();
+    }
+
     public FilteredList<Email> getTagEmails(String tag) {
         return storage.getTagEmails(tag);
     }
@@ -99,6 +104,22 @@ public class EmailService {
         });
 
 
+    }
+
+
+    public void deleteEmail(Email email) {
+        var user = sessionService.getCurrentUser().getValue();
+        if (user == null) {
+            return;
+        }
+
+        tcpClient.requestDeleteUserEmail(user.getUserId(), email.getEmailId()).thenAccept(b -> {
+            if (b == true) {
+                Platform.runLater(() -> {
+                    storage.deleteEmail(email.getEmailId());
+                });
+            }
+        });
     }
 
     public CompletableFuture<Integer> loadUsers(List<UUID> ids) {

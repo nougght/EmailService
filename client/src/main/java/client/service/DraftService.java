@@ -1,11 +1,15 @@
 package client.service;
 
+import client.model.Email;
 import client.model.User;
 import client.network.TcpClient;
 import client.storage.DataStorage;
 import common.dto.Draft;
 import javafx.application.Platform;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -26,12 +30,12 @@ public class DraftService {
         });
 
 
-
     }
+
     public CompletableFuture<Integer> loadUserDrafts() {
         return tcpClient.requestUserDrafts(sessionService.getCurrentUser().get().getUserId()).thenApply(drafts -> {
             Platform.runLater(() -> {
-                storage.addDrafts(
+                storage.setAllDrafts(
                         drafts
                 );
             });
@@ -40,6 +44,7 @@ public class DraftService {
     }
 
     public CompletableFuture<Draft> addDraft(Draft draft) {
+        draft.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         return tcpClient.requestAddDraft(draft).thenApply(draftId ->
         {
             Platform.runLater(() -> {
@@ -51,14 +56,36 @@ public class DraftService {
     }
 
     public CompletableFuture<Boolean> updateDraft(Draft draft) {
-        Platform.runLater(() -> {
-            storage.updateDraft(draft);
+        draft.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+        return tcpClient.requestDraftUpdate(draft).thenApply(b ->
+        {
+            if (b == true) {
+                Platform.runLater(() -> {
+                    storage.updateDraft(draft);
+                });
+            }
+            return b;
         });
-        return tcpClient.requestDraftUpdate(draft);
     }
 
     // TODO: draft deleting without sending
-    public void deleteDraft(UUID draftId) {
+    public void deleteDraftLocal(UUID draftId) {
         storage.deleteDraft(draftId);
+    }
+
+
+    public void deleteDraft(UUID draftId) {
+        var user = sessionService.getCurrentUser().getValue();
+        if (user == null) {
+            return;
+        }
+
+        tcpClient.requestDeleteDraft(draftId).thenAccept(b -> {
+            if (b == true) {
+                Platform.runLater(() -> {
+                    storage.deleteDraft(draftId);
+                });
+            }
+        });
     }
 }

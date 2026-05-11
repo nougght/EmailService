@@ -12,12 +12,14 @@ public class EmailRepository {
     public ArrayList<Email> getUserEmails(UUID userId) {
         var con = DatabaseManager.getConnection();
         try {
+
             PreparedStatement statement = con.prepareStatement("""
-                    SELECT emails.email_id, sender_id, subject, body, sent_at,
+                    SELECT ue.email_id, ue.is_read, ue.folder, sender_id, subject, body, sent_at,
                     sender.username as sender_username,
                     r.recipient_ids,
                     r.recipient_usernames
-                    FROM emails
+                    FROM user_emails as ue
+                    LEFT JOIN emails on emails.email_id = ue.email_id
                     LEFT JOIN users as sender ON emails.sender_id = sender.user_id
                     LEFT JOIN (
                         SELECT
@@ -27,10 +29,10 @@ public class EmailRepository {
                         FROM email_recipients
                         GROUP BY email_id
                         ) r ON emails.email_id = r.email_id
-                    WHERE emails.sender_id = ? OR ? = ANY(r.recipient_ids)
+                    WHERE ue.user_id = ?
                     """);
             statement.setObject(1, userId);
-            statement.setObject(2, userId);
+//            statement.setObject(2, userId);
             var rows = statement.executeQuery();
             System.out.println(rows.toString());
             ArrayList<Email> result = new ArrayList<Email>();
@@ -184,12 +186,79 @@ public class EmailRepository {
         var con = DatabaseManager.getConnection();
         try {
             con.setAutoCommit(false);
+//            var st = con.prepareStatement("""
+//                    SELECT emails.email_id, sender_id, subject, body, sent_at,
+//                    sender.username as sender_username,
+//                    r.recipient_ids,
+//                    r.recipient_usernames
+//                    FROM emails
+//                    LEFT JOIN users as sender ON emails.sender_id = sender.user_id
+//                    LEFT JOIN (
+//                        SELECT
+//                            email_id,
+//                            array_agg(user_id) as recipient_ids,
+//                            array_agg(username) as recipient_usernames
+//                        FROM email_recipients
+//                        GROUP BY email_id
+//                        ) r ON emails.email_id = r.email_id
+//                    WHERE emails.email_id = ?
+//                    """);
+//            st.setObject(1, emailId);
+//
+//            var rows = st.executeQuery();
+//            if (rows.next()) {
+//                var email = new Email(
+//                        UUID.fromString(rows.getString("email_id")),
+//                        UUID.fromString(rows.getString("sender_id")),
+//                        rows.getString("sender_username"),
+//                        rows.getString("subject"),
+//                        rows.getString("body"),
+//                        rows.getObject("sent_at", OffsetDateTime.class),
+//                        new User(
+//                                rows.getObject("sender_id", UUID.class),
+//                                rows.getString("sender_username"),
+//                                null,
+//                                null,
+//                                null
+////                                rows.getString("sender_email"),
+////                                rows.getObject("sender_created_at", OffsetDateTime.class)
+//                        ),
+//                        null,
+//                        null
+//
+//                );
+//                if (userId != null) {
+//                    PreparedStatement detailsQuery = con.prepareStatement("""
+//                            SELECT folder, is_read FROM user_emails
+//                            WHERE email_id = ? AND user_id = ?
+//                            """);
+//                    detailsQuery.setObject(1, emailId);
+//                    detailsQuery.setObject(2, userId);
+//                    var detailsRows = detailsQuery.executeQuery();
+//                    if (detailsRows.next()) {
+//                        email.setDetails(new UserEmail(
+//                                userId,
+//                                detailsRows.getString("folder"),
+//                                detailsRows.getBoolean("is_read")));
+//                    }
+//                }
+//                var recipientIds = (UUID[]) rows.getArray("recipient_ids").getArray();
+//                var recipientUsernames = (String[]) rows.getArray("recipient_usernames").getArray();
+//                var recipients = new ArrayList<EmailRecipient>(recipientIds.length);
+//
+//                for (int i = 0; i < recipientIds.length; i++) {
+//                    var r = new EmailRecipient(emailId, recipientIds[i], recipientUsernames[i]);
+//                    recipients.add(r);
+//                }
+//                email.setRecipients(recipients);
+
             var st = con.prepareStatement("""
-                    SELECT emails.email_id, sender_id, subject, body, sent_at,
+                    SELECT ue.email_id, ue.is_read, ue.folder, sender_id, subject, body, sent_at,
                     sender.username as sender_username,
                     r.recipient_ids,
                     r.recipient_usernames
-                    FROM emails
+                    FROM user_emails as ue
+                    LEFT JOIN emails on emails.email_id = ue.email_id
                     LEFT JOIN users as sender ON emails.sender_id = sender.user_id
                     LEFT JOIN (
                         SELECT
@@ -199,9 +268,10 @@ public class EmailRepository {
                         FROM email_recipients
                         GROUP BY email_id
                         ) r ON emails.email_id = r.email_id
-                    WHERE emails.email_id = ?
+                    WHERE ue.email_id = ? AND ue.user_id = ?
                     """);
             st.setObject(1, emailId);
+            st.setObject(2, userId);
 
             var rows = st.executeQuery();
             if (rows.next()) {
@@ -222,24 +292,14 @@ public class EmailRepository {
 //                                rows.getObject("sender_created_at", OffsetDateTime.class)
                         ),
                         null,
-                        null
+                        new UserEmail(
+                                userId,
+                                rows.getString("folder"),
+                                rows.getBoolean("is_read")
+                        )
 
                 );
-                if (userId != null) {
-                    PreparedStatement detailsQuery = con.prepareStatement("""
-                            SELECT folder, is_read FROM user_emails
-                            WHERE email_id = ? AND user_id = ?
-                            """);
-                    detailsQuery.setObject(1, emailId);
-                    detailsQuery.setObject(2, userId);
-                    var detailsRows = detailsQuery.executeQuery();
-                    if (detailsRows.next()) {
-                        email.setDetails(new UserEmail(
-                                userId,
-                                detailsRows.getString("folder"),
-                                detailsRows.getBoolean("is_read")));
-                    }
-                }
+
                 var recipientIds = (UUID[]) rows.getArray("recipient_ids").getArray();
                 var recipientUsernames = (String[]) rows.getArray("recipient_usernames").getArray();
                 var recipients = new ArrayList<EmailRecipient>(recipientIds.length);
@@ -249,7 +309,6 @@ public class EmailRepository {
                     recipients.add(r);
                 }
                 email.setRecipients(recipients);
-
                 con.commit();
                 return Optional.of(email);
             }
@@ -263,5 +322,22 @@ public class EmailRepository {
             }
         }
         return Optional.<Email>empty();
+    }
+
+    public void deleteUserEmail(UUID userId, UUID emailId) {
+        var con = DatabaseManager.getConnection();
+        try {
+            var st = con.prepareStatement("""
+                    DELETE FROM user_emails WHERE user_id = ? AND email_id = ?
+                    """);
+            st.setObject(1, userId);
+            st.setObject(2, emailId);
+
+            st.executeUpdate();
+
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            throw new RuntimeException(e);
+        }
     }
 }
