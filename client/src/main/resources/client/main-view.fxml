@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.*?>
 
-<StackPane prefHeight="386.0" prefWidth="448.0" styleClass="mainStackPane" stylesheets="@styles/base.css"
+<StackPane prefHeight="386.0" prefWidth="448.0" styleClass="mainStackPane"
            xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="client.view.MainController">
     <children>
@@ -18,10 +18,24 @@
                                 <ToolBar prefHeight="40.0" prefWidth="200.0">
                                     <items>
                                         <Button mnemonicParsing="false" onAction="#handleNewEmailClick"
-                                                text="Написать"/>
-                                        <Button mnemonicParsing="false" fx:id="deleteButton"  onAction="#handleDeleteClick" text="Удалить"/>
+                                                styleClass="toolbar-button" text="Написать">
+                                            <graphic>
+                                                <FontIcon iconLiteral="fth-edit-3" iconSize="18"/>
+                                            </graphic>
+                                        </Button>
+                                        <Button fx:id="deleteButton" mnemonicParsing="false"
+                                                onAction="#handleDeleteClick" styleClass="toolbar-button"
+                                                text="Удалить">
+                                            <graphic>
+                                                <FontIcon iconLiteral="fth-trash-2" iconSize="18"/>
+                                            </graphic>
+                                        </Button>
                                         <Button mnemonicParsing="false" onAction="#handleLogoutClick"
-                                                text="Выйти из аккаунта"/>
+                                                styleClass="toolbar-button" text="Выйти из аккаунта">
+                                            <graphic>
+                                                <FontIcon iconLiteral="fth-log-out" iconSize="18"/>
+                                            </graphic>
+                                        </Button>
                                     </items>
                                 </ToolBar>
                             </children>
@@ -54,24 +68,22 @@
                                 </VBox>
                                 <VBox maxWidth="1.7976931348623157E308" minWidth="100.0">
                                     <children>
-                                        <HBox>
+                                        <HBox styleClass="mail-list-toolbar">
                                             <children>
-                                                <Button fx:id="refreshButton" alignment="CENTER" mnemonicParsing="false"
-                                                        onAction="#handleClick" textAlignment="CENTER"
+                                                <Button fx:id="refreshButton" mnemonicParsing="false"
+                                                        onAction="#handleClick"
+                                                        styleClass="toolbar-button icon-only"
                                                         HBox.hgrow="NEVER">
                                                     <graphic>
-                                                        <FontIcon iconLiteral="fth-refresh-cw" iconSize="16"/>
+                                                        <FontIcon iconLiteral="fth-refresh-cw" iconSize="18"/>
                                                     </graphic>
                                                 </Button>
-<!--                                                <Button fx:id="sortButton" alignment="CENTER" mnemonicParsing="false"-->
-<!--                                                        onAction="#handleSort" text="Порядок" textAlignment="CENTER"-->
-<!--                                                        HBox.hgrow="NEVER">-->
-<!--                                                    <graphic>-->
-<!--                                                        <FontIcon iconLiteral="fth-list" iconSize="16"/>-->
-<!--                                                    </graphic>-->
-<!--                                                </Button>-->
-                                                <ChoiceBox fx:id="sortChoice" prefWidth="150.0">
-                                                </ChoiceBox>
+                                                <Label mouseTransparent="true" styleClass="inline-icon-label">
+                                                    <graphic>
+                                                        <FontIcon iconLiteral="fth-sliders" iconSize="16"/>
+                                                    </graphic>
+                                                </Label>
+                                                <ChoiceBox fx:id="sortChoice" prefWidth="150.0"/>
                                             </children>
                                         </HBox>
                                         <ListView fx:id="emailsList" VBox.vgrow="ALWAYS"/>

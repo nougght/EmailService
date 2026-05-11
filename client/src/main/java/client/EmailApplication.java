@@ -115,7 +115,9 @@ public class EmailApplication extends Application {
             modalStage.showAndWait();
         });
 
+        stage.setMaximized(true);
         stage.show();
+
         // TODO move to another place
         new Thread(() -> {
             while (true) {

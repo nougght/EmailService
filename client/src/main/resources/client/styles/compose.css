@@ -1,0 +1,81 @@
+/* Окно составления письма (отдельный Stage) */
+
+.anchor-pane-compose {
+    -fx-background-color: #f4f4f5;
+}
+
+.composeVBox {
+    -fx-spacing: 8px;
+    -fx-max-width: 720px;
+}
+
+.composeVBox .label {
+    -fx-font-size: 15px;
+    -fx-text-fill: #52525b;
+}
+
+.composeVBox #warningLabel {
+    -fx-text-fill: #b91c1c;
+    -fx-wrap-text: true;
+}
+
+.composeVBox .text-area {
+    -fx-min-height: 180px;
+}
+
+.composeVBox #receiverField {
+    -fx-min-width: 200px;
+}
+
+.composeVBox .button {
+    -fx-min-width: 88px;
+    -fx-graphic-text-gap: 8px;
+}
+
+.composeVBox .button FontIcon {
+    -fx-fill: #18181b;
+    -fx-icon-color: #18181b;
+}
+
+.compose-send-button {
+    -fx-font-size: 15px;
+    -fx-min-height: 38px;
+}
+
+.compose-add-recipient {
+    -fx-min-width: 36px;
+    -fx-min-height: 34px;
+    -fx-pref-height: 34px;
+    -fx-padding: 0;
+}
+
+.composeVBox .list-view {
+    -fx-max-height: 120px;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e4e4e7;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+.compose-recipient-username {
+    -fx-font-size: 15px;
+}
+
+.compose-recipient-remove-btn {
+    -fx-min-width: 20px;
+    -fx-pref-width: 20px;
+    -fx-max-width: 20px;
+    -fx-min-height: 20px;
+    -fx-pref-height: 20px;
+    -fx-max-height: 20px;
+    -fx-padding: 0;
+    -fx-font-size: 12px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-graphic-text-gap: 0;
+}
+
+.compose-recipient-remove-btn FontIcon {
+    -fx-fill: #52525b;
+    -fx-icon-color: #52525b;
+}

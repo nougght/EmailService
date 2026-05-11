@@ -225,6 +225,7 @@ public class MainViewModel {
     }
 
     public void onDraftClicked(Draft draft) {
+        onOpenDraft.set(null);
         onOpenDraft.set(draft);
     }
 

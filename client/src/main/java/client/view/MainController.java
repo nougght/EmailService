@@ -8,16 +8,14 @@ import common.dto.EmailItem;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class MainController {
@@ -33,66 +31,37 @@ public class MainController {
 
         userLabel.textProperty().bind(Bindings.selectString(viewModel.getCurrentUser(), "username"));
         emailsList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal instanceof Email email) {
-                viewModel.onEmailClicked((email).getEmailId());
-            } else if (newVal instanceof Draft draft) {
-                viewModel.onDraftClicked(draft);
-            }
+            viewModel.onEmailsListSelected(newVal);
         });
+
         try {
             emailsList.setCellFactory(lv -> {
+                FXMLLoader loader = new FXMLLoader(MainController.class.getResource("/client/email-list-item.fxml"));
+                final VBox rowRoot;
+                final EmailListItemController rowPresenter;
+                try {
+                    rowRoot = loader.load();
+                    rowPresenter = loader.getController();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
                 var cell = new ListCell<EmailItem>() {
-                    private final VBox root = new VBox();
-                    private final HBox row = new HBox();
-                    private final Label subject = new Label();
-                    private final Label from = new Label();
-                    private final Label to = new Label();
-                    private final String readStyle = "-fx-text-fill:gray";
-                    private final String newStyle = "-fx-text-fill:blue";
-
-                    {
-                        Region spacer = new Region();
-                        HBox.setHgrow(spacer, Priority.ALWAYS);
-                        row.getChildren().addAll(from, spacer, to);
-                        subject.setFont(new Font(15));
-                        from.setFont(new Font(12));
-                        to.setFont(new Font(12));
-                        root.getChildren().addAll(subject, row);
-                        root.setAlignment(Pos.CENTER);
-                        root.setPadding(new Insets(3, 0, 3, 0));
-                        VBox.setMargin(root, new Insets(13, 10, 3, 0));
-
-                    }
-
                     @Override
                     protected void updateItem(EmailItem item, boolean empty) {
-                        System.out.println("Update email item:" + item);
                         super.updateItem(item, empty);
 
                         if (empty || item == null) {
                             setGraphic(null);
                         } else {
-                            if (item instanceof Email email) {
-                                subject.setText(email.getSubject());
-                                from.setText(email.getSender().getUsername());
-                                to.setText(email.getRecipients().getFirst().getUsername());
-
-                                if (email.isRead()) {
-                                    root.setStyle(readStyle);
-                                } else {
-                                    root.setStyle(newStyle);
-                                }
-                            } else if (item instanceof Draft draft) {
-                                subject.setText(draft.getSubject());
-                                from.setText("Черновик");
-                                var recipients = draft.getRecipients();
-                                to.setText(recipients.isEmpty() ? "" : recipients.getFirst());
-
-                            }
-                            setGraphic(root);
+                            var user = viewModel.getCurrentUser().get();
+                            String me = user != null ? user.getUsername() : null;
+                            rowPresenter.apply(item, me);
+                            setGraphic(rowRoot);
                         }
                     }
                 };
+
 
                 ContextMenu menu = new ContextMenu();
 //                MenuItem reply   = new MenuItem("Ответить");
@@ -100,7 +69,13 @@ public class MainController {
                 menu.getItems().addAll(delete);
 
 //                reply.setOnAction(e -> System.out.println("Ответ: " + cell.getItem()));
-
+                cell.setOnMouseClicked(e -> {
+                    if (cell.getItem() instanceof Email email) {
+                        viewModel.onEmailClicked((email).getEmailId());
+                    } else if (cell.getItem() instanceof Draft draft) {
+                        viewModel.onDraftClicked(draft);
+                    }
+                });
                 cell.setOnContextMenuRequested(e -> {
                     if (!cell.isEmpty()) {
                         menu.show(cell, e.getScreenX(), e.getScreenY());
@@ -111,9 +86,6 @@ public class MainController {
                 return cell;
             });
 
-            emailsList.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
-                viewModel.onEmailsListSelected(nv);
-            });
 
             var root = tree.getRoot();
 //            var foldersRoot = new TreeItem<>("Папки");
@@ -148,11 +120,7 @@ public class MainController {
             });
 
             tree.setCellFactory(tv -> new TreeCell<String>() {
-                private Label name = new Label();
-
-                {
-                    name.setFont(new Font(15));
-                }
+                private final Label name = new Label();
 
                 @Override
                 protected void updateItem(String item, boolean b) {
@@ -185,6 +153,7 @@ public class MainController {
 
         if (item != null) {
             viewModel.onDeleteClicked(item);
+
 //            emailsList.getSelectionModel().select(ind + 1);
         } else {
             System.out.println("delete clicked but selected item == null");

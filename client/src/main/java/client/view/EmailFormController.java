@@ -9,7 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.text.Font;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 public class EmailFormController {
     private EmailFormViewModel viewModel;
@@ -28,12 +28,19 @@ public class EmailFormController {
         recipientsList.setCellFactory(lv -> new ListCell<String>() {
             private final HBox row = new HBox();
             private final Label username = new Label();
-            private final Button removeButton = new Button("x");
+            private final Button removeButton = new Button();
             {
+                FontIcon removeIcon = new FontIcon();
+                removeIcon.setIconLiteral("fth-x");
+                removeIcon.setIconSize(11);
+                removeButton.setGraphic(removeIcon);
+                removeButton.setText(null);
+                removeButton.getStyleClass().add("compose-recipient-remove-btn");
+                removeButton.setFocusTraversable(false);
                 Region spacer = new Region();
                 HBox.setHgrow(spacer, Priority.ALWAYS);
                 row.getChildren().addAll(username, spacer, removeButton);
-                username.setFont(new Font(15));
+                username.getStyleClass().add("compose-recipient-username");
                 row.setPadding(new Insets(5, 5, 5, 5));
                 row.focusedProperty().addListener((obs, oldValue, newValue) -> {
                     if (!newValue) {

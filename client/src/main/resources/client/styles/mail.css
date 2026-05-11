@@ -1,0 +1,233 @@
+/* Главное окно: toolbar, дерево папок, список писем, превью */
+
+.mainStackPane {
+    -fx-background-color: #f4f4f5;
+}
+
+.mainStackPane .tool-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e4e4e7;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 6px 10px;
+    -fx-spacing: 8px;
+}
+
+.mainStackPane .split-pane {
+    -fx-background-color: #f4f4f5;
+    -fx-padding: 0;
+}
+
+.mainStackPane .split-pane > .split-pane-divider {
+    -fx-background-color: #e4e4e7;
+    -fx-padding: 0 2;
+}
+
+.mainStackPane .tree-view,
+.mainStackPane .list-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent;
+    -fx-background-insets: 0;
+}
+
+.mainStackPane .tree-cell,
+.mainStackPane .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 6px 10px;
+    -fx-text-fill: #3f3f46;
+}
+
+.mainStackPane .tree-cell .label {
+    -fx-font-size: 15px;
+}
+
+.mainStackPane .tree-cell:selected,
+.mainStackPane .list-cell:selected {
+    -fx-background-color: #f4f4f5;
+    -fx-text-fill: #18181b;
+}
+
+.mainStackPane .list-cell:filled:selected:focused,
+.mainStackPane .list-cell:filled:selected {
+    -fx-background-color: #e4e4e7;
+}
+
+.mainStackPane .choice-box {
+    -fx-font-size: 15px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: #d4d4d8;
+    -fx-background-color: #ffffff;
+}
+
+.mainStackPane .choice-box > .label {
+    -fx-text-fill: #18181b;
+}
+
+.mainStackPane .choice-box:focused > .label {
+    -fx-text-fill: #18181b;
+}
+
+.mainStackPane .choice-box:hover > .label {
+    -fx-text-fill: #18181b;
+}
+
+/* Выпадающий список сортировки */
+.mainStackPane .choice-box .context-menu .radio-menu-item .label,
+.mainStackPane .choice-box .context-menu .label {
+    -fx-text-fill: #18181b;
+}
+
+.mainStackPane .choice-box .context-menu .radio-menu-item:focused .label,
+.mainStackPane .choice-box .context-menu .menu-item:focused .label {
+    -fx-text-fill: #18181b;
+}
+
+/* Панель над списком писем: одинаковая высота строки */
+.mail-list-toolbar {
+    -fx-alignment: center-left;
+    -fx-spacing: 8px;
+    -fx-padding: 4px 0 6px 0;
+}
+
+.mail-list-toolbar .inline-icon-label {
+    -fx-text-fill: #71717a;
+    -fx-padding: 0 2px 0 0;
+}
+
+.mail-list-toolbar .inline-icon-label FontIcon {
+    -fx-fill: #52525b;
+    -fx-icon-color: #52525b;
+}
+
+/* Кнопки тулбара и списка — одна высота, иконка+текст */
+.toolbar-button {
+    -fx-font-size: 15px;
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+    -fx-padding: 0 14px;
+    -fx-graphic-text-gap: 8px;
+}
+
+.toolbar-button.icon-only {
+    -fx-min-width: 38px;
+    -fx-pref-width: 38px;
+    -fx-max-width: 38px;
+    -fx-padding: 0;
+}
+
+.toolbar-button FontIcon {
+    -fx-fill: #18181b;
+    -fx-icon-color: #18181b;
+}
+
+.toolbar-button:armed FontIcon,
+.toolbar-button:pressed FontIcon {
+    -fx-fill: #18181b;
+    -fx-icon-color: #18181b;
+}
+
+.mainStackPane .tool-bar .toolbar-button {
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+}
+
+/* Кастомная ячейка списка писем: при выделении строки подписи остаются читаемыми */
+.mainStackPane .list-view .list-cell:filled:selected .label,
+.mainStackPane .list-view .list-cell:filled:selected:focused .label,
+.mainStackPane .list-view .list-cell:filled:hover .label,
+.mainStackPane .list-view .list-cell:filled:selected .email-list-item-field-label,
+.mainStackPane .list-view .list-cell:filled:selected:focused .email-list-item-field-label {
+    -fx-text-fill: #18181b;
+}
+
+.mainStackPane .tree-cell:selected .label,
+.mainStackPane .tree-cell:selected:focused .label,
+.mainStackPane .tree-cell:hover .label {
+    -fx-text-fill: #18181b;
+}
+
+/* Строка списка писем (FXML email-list-item.fxml) */
+.email-list-item {
+    -fx-spacing: 6px;
+}
+
+.email-list-item-field-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #71717a;
+}
+
+.email-list-item-subject {
+    -fx-font-size: 16px;
+    -fx-text-overrun: ellipsis;
+}
+
+.email-list-item-counterparty {
+    -fx-font-size: 14px;
+}
+
+.email-list-item-snippet {
+    -fx-font-size: 13px;
+    -fx-text-fill: #71717a;
+    -fx-opacity: 0.95;
+}
+
+.email-list-item--unread .email-list-item-subject {
+    -fx-font-weight: bold;
+    -fx-text-fill: #18181b;
+}
+
+.email-list-item--read .email-list-item-subject {
+    -fx-font-weight: normal;
+    -fx-text-fill: #3f3f46;
+}
+
+.email-list-item--read .email-list-item-counterparty {
+    -fx-text-fill: #71717a;
+}
+
+.email-list-item--unread .email-list-item-counterparty {
+    -fx-text-fill: #52525b;
+}
+
+.email-list-item--draft .email-list-item-subject {
+    -fx-font-style: italic;
+    -fx-text-fill: #52525b;
+}
+
+.email-list-item--draft .email-list-item-counterparty {
+    -fx-text-fill: #71717a;
+}
+
+.email-list-item-folder--inbox {
+    -fx-border-width: 0 0 0 3px;
+    -fx-border-color: transparent transparent transparent #3b82f6;
+}
+
+.email-list-item-folder--outbox {
+    -fx-border-width: 0 0 0 3px;
+    -fx-border-color: transparent transparent transparent #16a34a;
+}
+
+.email-list-item-folder--all {
+    -fx-border-width: 0 0 0 3px;
+    -fx-border-color: transparent transparent transparent #a1a1aa;
+}
+
+.email-list-item-folder--drafts {
+    -fx-border-width: 0 0 0 3px;
+    -fx-border-color: transparent transparent transparent #ca8a04;
+}
+
+.email-list-item-folder--unknown {
+    -fx-border-width: 0 0 0 3px;
+    -fx-border-color: transparent transparent transparent #d4d4d8;
+}
+
+/* Правая колонка: подпись пользователя до открытия письма */
+.mainStackPane #userLabel {
+    -fx-font-size: 15px;
+    -fx-padding: 16px;
+    -fx-text-fill: #71717a;
+    -fx-wrap-text: true;
+}

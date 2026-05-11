@@ -38,6 +38,8 @@ public class NavigationService {
         addNewEmailWindow(null);
     };
     private final ChangeListener<Draft> onOpenDraftListener = (_, _, draft) -> {
+        if (draft == null)
+            return;
         addNewEmailWindow(draft);
     };
 
@@ -54,7 +56,22 @@ public NavigationService(AuthService authService, SessionService sessionService,
     this.mainStage = mainStage;
     rootPane = new StackPane();
     Scene scene = new Scene(rootPane, 1000, 700);
-//        scene.getStylesheets().add(getClass().getResource("/client/styles/base.css").toExternalForm());
+    var base = getClass().getResource("/client/styles/base.css");
+    var auth = getClass().getResource("/client/styles/auth.css");
+    var mail = getClass().getResource("/client/styles/mail.css");
+    var emailDetail = getClass().getResource("/client/styles/email-detail.css");
+    if (base != null) {
+        scene.getStylesheets().add(base.toExternalForm());
+    }
+    if (auth != null) {
+        scene.getStylesheets().add(auth.toExternalForm());
+    }
+    if (mail != null) {
+        scene.getStylesheets().add(mail.toExternalForm());
+    }
+    if (emailDetail != null) {
+        scene.getStylesheets().add(emailDetail.toExternalForm());
+    }
     mainStage.setTitle("Email Service");
     mainStage.setScene(scene);
 
@@ -193,7 +210,7 @@ public void addNewEmailWindow(Draft newDraft) {
                 closeNewEmailWindow(draft.getDraftId());
             });
 
-            stage.onCloseRequestProperty().addListener(_ -> {
+            stage.setOnHidden(e -> {
                 vm.saveDraft();
                 closeNewEmailWindow(draft.getDraftId());
             });
@@ -201,11 +218,20 @@ public void addNewEmailWindow(Draft newDraft) {
             contr.setViewModel(vm);
 
             Scene scene = new Scene(emailFormView);
+            var composeBase = EmailApplication.class.getResource("/client/styles/base.css");
+            var compose = EmailApplication.class.getResource("/client/styles/compose.css");
+            if (composeBase != null) {
+                scene.getStylesheets().add(composeBase.toExternalForm());
+            }
+            if (compose != null) {
+                scene.getStylesheets().add(compose.toExternalForm());
+            }
             stage.setScene(scene);
             windows.add(stage);
             newEmailWindows.put(draft.getDraftId(), stage);
             stage.setY(mainStage.getY() + 200);
-            stage.setX(mainStage.getX() + mainStage.getWidth() / 2 - 150);
+            stage.setX(mainStage.getX() + mainStage.getWidth() / 2 -400);
+
             stage.show();
             stage.focusedProperty().addListener((obs, oldValue, newValue) -> {
                 if (!newValue) {
