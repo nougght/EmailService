@@ -111,7 +111,7 @@ public class EmailFormViewModel {
                 Platform.runLater(()-> warning.set("Ошибка отправки"));
             } else {
                 Platform.runLater(()-> {
-                    draftService.deleteDraft(draft.getDraftId());
+                    draftService.deleteDraftLocal(draft.getDraftId());
                     onEmailSent.set(new Object());
                 });
             }

@@ -113,6 +113,12 @@ public class ClientHandler implements Runnable {
 
             } catch (IOException i) {
                 System.out.println(i.toString());
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("Client connection closed");
                 connectionManager.removeHandler(userId, this);
                 return;
             }
@@ -154,6 +160,14 @@ public class ClientHandler implements Runnable {
                     break;
                 case "UpdateDraft":
                     updateDraftsHandler((UpdateDraftRequest) request);
+                    break;
+                case "DeleteUserEmail":
+                    deleteUserEmailHandler((DeleteUserEmailRequest) request);
+                    break;
+                case "DeleteDraft":
+                    deleteDraftHandler((DeleteDraftRequest) request);
+                    break;
+
             }
         } catch (Exception e) {
             System.out.println("ClientHandler" + socket.getInetAddress() + " " + e.toString());
@@ -451,6 +465,48 @@ public class ClientHandler implements Runnable {
                     request.getRequestId(),
                     "success"
             ));
+            sOut.println(jsonResponse);
+            System.out.println("response sent");
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteUserEmailHandler(DeleteUserEmailRequest request) {
+        var userId = verifyAccessToken(request);
+        if (userId == null) {
+            return;
+        }
+        try {
+            emailService.deleteUserEmail(request.getUserId(), request.getEmailId());
+
+            var jsonResponse = jsonMapper.writeValueAsString(new DeleteUserEmailResponse(
+                    request.getRequestId(),
+                    "success"
+            ));
+            sOut.println(jsonResponse);
+            System.out.println("response sent");
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public void deleteDraftHandler(DeleteDraftRequest request) {
+        var userId = verifyAccessToken(request);
+        if (userId == null) {
+            return;
+        }
+        try {
+            draftService.delete(request.getDraftId());
+
+            var jsonResponse = jsonMapper.writeValueAsString(new DeleteDraftResponse(
+                    request.getRequestId(),
+                    "success"
+            ));
+
             sOut.println(jsonResponse);
             System.out.println("response sent");
         } catch (Exception e) {

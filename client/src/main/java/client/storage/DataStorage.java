@@ -43,6 +43,15 @@ public class DataStorage {
         }
     }
 
+
+    public FilteredList<? extends EmailItem> getEmailsFiltered() {
+        return emails.filtered(d -> true);
+    }
+
+    public FilteredList<? extends EmailItem> getDraftsFiltered() {
+        return drafts.filtered(d -> true);
+    }
+
     public FilteredList<Email> getTagEmails(String tag) {
         return null;
     }
@@ -88,9 +97,10 @@ public class DataStorage {
         this.drafts.add(draft);
     }
 
-    public void addDrafts(List<Draft> draftList) {
-        this.drafts.addAll(draftList);
+    public void setAllDrafts(List<Draft> draftList) {
+        this.drafts.setAll(draftList);
     }
+
     public void updateDraft(Draft draft) {
         var optional = drafts.stream().filter(d -> d.getDraftId() == draft.getDraftId()).findFirst();
         if (optional.isPresent()) {
@@ -106,4 +116,8 @@ public class DataStorage {
     public void deleteDraft(UUID draftId) {
         this.drafts.removeIf(d -> d.getDraftId() == draftId);
     }
+    public void deleteEmail(UUID emailId) {
+        this.emails.removeIf(e -> e.getEmailId() == emailId);
+    }
+
 }

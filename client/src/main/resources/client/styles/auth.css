@@ -1,0 +1,66 @@
+/* Экраны входа и регистрации: ScrollPane → StackPane → VBox */
+
+.loginView,
+.registrationView {
+    -fx-background-color: #f4f4f5;
+    -fx-background: #f4f4f5;
+}
+
+.loginView > .viewport,
+.registrationView > .viewport {
+    -fx-background-color: transparent;
+}
+
+.authTitle {
+    -fx-font-size: 26px;
+    -fx-text-fill: #18181b;
+    -fx-padding: 0 0 8px 0;
+}
+
+.usernameField,
+.passwordField {
+    -fx-min-width: 260px;
+    -fx-pref-width: 280px;
+}
+
+.loginView .button,
+.registrationView .button {
+    -fx-min-width: 120px;
+}
+
+/* Вторичная ссылка «Создать аккаунт» / «Уже есть аккаунт» */
+.loginView #toRegistrationButton,
+.registrationView #toLoginButton {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #52525b;
+    -fx-underline: true;
+    -fx-padding: 4px 8px;
+}
+
+.loginView #toRegistrationButton:hover,
+.registrationView #toLoginButton:hover {
+    -fx-text-fill: #18181b;
+}
+
+.loginView #loginButton,
+.registrationView #registrationButton {
+    -fx-background-color: #18181b;
+    -fx-border-color: #18181b;
+    -fx-text-fill: #fafafa;
+}
+
+.loginView #loginButton:hover,
+.registrationView #registrationButton:hover {
+    -fx-background-color: #27272a;
+    -fx-border-color: #27272a;
+}
+
+.loginView #loginButton:armed,
+.loginView #loginButton:pressed,
+.registrationView #registrationButton:armed,
+.registrationView #registrationButton:pressed,
+.loginView #loginButton:focused,
+.registrationView #registrationButton:focused {
+    -fx-text-fill: #fafafa;
+}

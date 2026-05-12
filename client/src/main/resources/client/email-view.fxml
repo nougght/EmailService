@@ -4,21 +4,22 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-
-<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="500.0" prefWidth="653.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.view.EmailController">
+<?import org.kordamp.ikonli.javafx.*?>
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="500.0" prefWidth="653.0" styleClass="emailDetailRoot" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.view.EmailController">
    <children>
       <StackPane prefHeight="461.0" prefWidth="629.0" VBox.vgrow="ALWAYS">
          <children>
-              <AnchorPane style="-fx-background-color: white;       -fx-background-radius: 10;       -fx-border-radius: 10;       -fx-border-color: lightgray;" StackPane.alignment="CENTER">
+              <AnchorPane styleClass="emailDetailCard" StackPane.alignment="CENTER">
                   <children>
                       <VBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
                           <children>
-                              <Label fx:id="subjectLabel" text="Заголовок" textAlignment="CENTER">
-                                  <font>
-                                      <Font name="System Bold" size="14.0" />
-                                  </font>
-                              </Label>
+                              <HBox alignment="CENTER" spacing="10.0">
+                                  <children>
+                                      <Label styleClass="email-detail-field-label" text="Тема:"/>
+                                      <Label fx:id="subjectLabel" styleClass="email-detail-subject" text="Заголовок"
+                                             textAlignment="CENTER" HBox.hgrow="ALWAYS"/>
+                                  </children>
+                              </HBox>
                               <GridPane alignment="TOP_CENTER">
                                   <columnConstraints>
                                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -31,22 +32,46 @@
                                   </rowConstraints>
                                   <children>
                                       <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.rowSpan="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
-                                      <Label text="Кому" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                      <Label text="От кого" GridPane.columnIndex="1" />
+                                      <Label styleClass="email-detail-field-label" text="Кому:" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                      <Label styleClass="email-detail-field-label" text="От:" GridPane.columnIndex="1" />
                                       <Label fx:id="senderLabel" text="Отправитель" GridPane.columnIndex="2" />
-                              <ListView orientation="HORIZONTAL" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1"
-                                        fx:id="recipientsList"/>
+                                      <ScrollPane fx:id="recipientsScroll" fitToWidth="true" maxHeight="120.0"
+                                                  minHeight="36.0"
+                                                  styleClass="recipients-scroll" GridPane.columnIndex="2"
+                                                  GridPane.rowIndex="1" GridPane.vgrow="NEVER">
+                                          <content>
+                                              <FlowPane fx:id="recipientsFlow" styleClass="recipients-flow"/>
+                                          </content>
+                                      </ScrollPane>
                                   </children>
                               </GridPane>
-                              <AnchorPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                              <VBox spacing="6.0" VBox.vgrow="ALWAYS">
                                   <children>
-                                      <Label fx:id="bodyLabel" alignment="TOP_LEFT" text="Текст" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" />
+                                      <Label styleClass="email-detail-field-label" text="Текст:"/>
+                                      <AnchorPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                                          <children>
+                                              <Label fx:id="bodyLabel" alignment="TOP_LEFT" text="Текст"
+                                                     AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
+                                                     AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0"/>
+                                          </children>
+                                      </AnchorPane>
                                   </children>
-                              </AnchorPane>
+                              </VBox>
                               <HBox alignment="CENTER" prefWidth="600.0" spacing="15.0">
                                   <children>
-                                      <Button fx:id="replyButton" mnemonicParsing="false" onAction="#handleReplyClick" text="Ответить" />
-                                      <Button fx:id="forwardButton" mnemonicParsing="false" onAction="#handleForwardClick" text="Переслать" />
+                                      <Button fx:id="replyButton" mnemonicParsing="false" onAction="#handleReplyClick"
+                                              styleClass="toolbar-button" text="Ответить">
+                                          <graphic>
+                                              <FontIcon iconLiteral="fth-corner-up-left" iconSize="18"/>
+                                          </graphic>
+                                      </Button>
+                                      <Button fx:id="forwardButton" mnemonicParsing="false"
+                                              onAction="#handleForwardClick" styleClass="toolbar-button"
+                                              text="Переслать">
+                                          <graphic>
+                                              <FontIcon iconLiteral="fth-share-2" iconSize="18"/>
+                                          </graphic>
+                                      </Button>
                                   </children>
                                   <padding>
                                       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

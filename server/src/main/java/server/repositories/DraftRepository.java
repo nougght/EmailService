@@ -13,13 +13,12 @@ import java.util.UUID;
 public class DraftRepository {
 
     public Optional<UUID> addDraft(Draft draft) {
-        var con = DatabaseManager.getConnection();
-        try {
+        try (var con = DatabaseManager.getConnection()) {
             var st = con.prepareStatement("""
-                INSERT INTO drafts(sender_id, subject, body, recipients)
-                VALUES (?, ?, ?, ?)
-                RETURNING draft_id
-                """);
+                    INSERT INTO drafts(sender_id, subject, body, recipients)
+                    VALUES (?, ?, ?, ?)
+                    RETURNING draft_id
+                    """);
             st.setObject(1, draft.getSenderId());
             st.setObject(2, draft.getSubject());
             st.setObject(3, draft.getBody());
@@ -29,15 +28,14 @@ public class DraftRepository {
             if (rows.next()) {
                 return Optional.of(rows.getObject("draft_id", UUID.class));
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return Optional.<UUID>empty();
     }
 
     public List<Draft> getDraftsByUserId(UUID userId) {
-        var con = DatabaseManager.getConnection();
-        try {
+        try (var con = DatabaseManager.getConnection()) {
             var st = con.prepareStatement("""
                     SELECT * FROM drafts
                     WHERE drafts.sender_id = ?
@@ -49,7 +47,7 @@ public class DraftRepository {
                 result.add(new Draft(
                         rows.getObject("draft_id", UUID.class),
                         rows.getObject("sender_id", UUID.class),
-                        new ArrayList<String> (List.of((String[]) rows.getArray("recipients").getArray())),
+                        new ArrayList<String>(List.of((String[]) rows.getArray("recipients").getArray())),
                         rows.getString("subject"),
                         rows.getString("body"),
                         rows.getObject("updated_at", OffsetDateTime.class),
@@ -63,8 +61,8 @@ public class DraftRepository {
     }
 
     public boolean draftExists(UUID draftId) {
-        var con = DatabaseManager.getConnection();
-        try {
+
+        try (var con = DatabaseManager.getConnection()) {
             var st = con.prepareStatement("""
                     SELECT 1 FROM drafts WHERE drafts.draft_id = ?
                     """);
@@ -80,8 +78,7 @@ public class DraftRepository {
     }
 
     public void updateDraft(Draft draft) {
-        var con = DatabaseManager.getConnection();
-        try {
+        try (var con = DatabaseManager.getConnection()) {
             var st = con.prepareStatement("""
                     UPDATE drafts
                     SET recipients = ?, subject = ?, body = ?
@@ -99,12 +96,11 @@ public class DraftRepository {
     }
 
     public void delete(UUID draftId) {
-        var con = DatabaseManager.getConnection();
-        try {
+        try (var con = DatabaseManager.getConnection()) {
             var st = con.prepareStatement("""
-                
-                    DELETE FROM drafts WHERE drafts.draft_id = ?;
-                """);
+                    
+                        DELETE FROM drafts WHERE drafts.draft_id = ?;
+                    """);
             st.setObject(1, draftId);
             st.executeUpdate();
 

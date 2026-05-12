@@ -1,6 +1,66 @@
-.mainStackPane{
-    -fx-font: 12px 'sans-serif';
-
+/* Глобальная типографика и фон сцены */
+.root {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+    -fx-font-size: 15px;
+    -fx-background-color: #f4f4f5;
 }
 
-.email
+/* Кнопки по умолчанию — плоские, нейтральные */
+.button {
+    -fx-font-size: 15px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-padding: 10px 16px;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d4d4d8;
+    -fx-border-width: 1px;
+    -fx-text-fill: #18181b;
+    -fx-graphic-text-gap: 8px;
+}
+
+.button:hover {
+    -fx-background-color: #fafafa;
+    -fx-text-fill: #18181b;
+}
+
+.button:armed,
+.button:pressed {
+    -fx-background-color: #e4e4e7;
+    -fx-text-fill: #18181b;
+}
+
+.button:focused {
+    -fx-border-color: #71717a;
+    -fx-text-fill: #18181b;
+}
+
+.button:disabled {
+    -fx-opacity: 0.55;
+    -fx-text-fill: #52525b;
+}
+
+/* Ikonli FontIcon внутри кнопки наследует цвет как текст */
+.button FontIcon {
+    -fx-fill: #18181b;
+    -fx-icon-color: #18181b;
+}
+
+/* Поля ввода */
+.text-field, .password-field, .text-area {
+    -fx-font-size: 15px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: #d4d4d8;
+    -fx-border-width: 1px;
+    -fx-background-color: #ffffff;
+    -fx-padding: 8px 10px;
+}
+
+.text-field:focused, .password-field:focused, .text-area:focused {
+    -fx-border-color: #71717a;
+}
+
+.text-area .content {
+    -fx-background-color: #ffffff;
+}
+

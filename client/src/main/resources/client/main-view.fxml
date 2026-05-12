@@ -2,8 +2,9 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.*?>
 
-<StackPane prefHeight="386.0" prefWidth="448.0" styleClass="mainStackPane" stylesheets="@styles/base.css"
+<StackPane prefHeight="386.0" prefWidth="448.0" styleClass="mainStackPane"
            xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="client.view.MainController">
     <children>
@@ -14,18 +15,27 @@
                     <top>
                         <VBox BorderPane.alignment="CENTER">
                             <children>
-                                <MenuBar>
-                                    <menus>
-                                        <Menu mnemonicParsing="false" text="Menu"/>
-                                    </menus>
-                                </MenuBar>
                                 <ToolBar prefHeight="40.0" prefWidth="200.0">
                                     <items>
                                         <Button mnemonicParsing="false" onAction="#handleNewEmailClick"
-                                                text="Написать"/>
-                                        <Button mnemonicParsing="false" text="Удалить"/>
+                                                styleClass="toolbar-button" text="Написать">
+                                            <graphic>
+                                                <FontIcon iconLiteral="fth-edit-3" iconSize="18"/>
+                                            </graphic>
+                                        </Button>
+                                        <Button fx:id="deleteButton" mnemonicParsing="false"
+                                                onAction="#handleDeleteClick" styleClass="toolbar-button"
+                                                text="Удалить">
+                                            <graphic>
+                                                <FontIcon iconLiteral="fth-trash-2" iconSize="18"/>
+                                            </graphic>
+                                        </Button>
                                         <Button mnemonicParsing="false" onAction="#handleLogoutClick"
-                                                text="Выйти из аккаунта"/>
+                                                styleClass="toolbar-button" text="Выйти из аккаунта">
+                                            <graphic>
+                                                <FontIcon iconLiteral="fth-log-out" iconSize="18"/>
+                                            </graphic>
+                                        </Button>
                                     </items>
                                 </ToolBar>
                             </children>
@@ -36,32 +46,44 @@
                                    BorderPane.alignment="TOP_LEFT">
                             <items>
                                 <VBox maxWidth="1.7976931348623157E308" minWidth="100.0">
-                                    <TreeView fx:id="tree" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" showRoot="false">
+                                    <TreeView fx:id="tree" prefHeight="200.0" prefWidth="200.0" showRoot="false"
+                                              VBox.vgrow="ALWAYS">
                                         <TreeItem value="root">
-<!--                                            <children>-->
-<!--                                                <TreeItem value="Папки" expanded="true">-->
-<!--                                                &lt;!&ndash;                                                    <children>&ndash;&gt;-->
-<!--                                                &lt;!&ndash;                                                        <TreeItem value="Вся почта"/>&ndash;&gt;-->
-<!--                                                &lt;!&ndash;                                                        <TreeItem value="Входящие"/>&ndash;&gt;-->
-<!--                                                &lt;!&ndash;                                                        <TreeItem value="Исходящие"/>&ndash;&gt;-->
-<!--                                                &lt;!&ndash;                                                        <TreeItem value="Черновики"/>&ndash;&gt;-->
-<!--                                                &lt;!&ndash;                                                        <TreeItem value="Папки"/>&ndash;&gt;-->
-<!--                                                &lt;!&ndash;                                                    </children>&ndash;&gt;-->
-<!--                                                </TreeItem>-->
-<!--                                                <TreeItem value="Теги">-->
+                                            <!--                                            <children>-->
+                                            <!--                                                <TreeItem value="Папки" expanded="true">-->
+                                            <!--                                                &lt;!&ndash;                                                    <children>&ndash;&gt;-->
+                                            <!--                                                &lt;!&ndash;                                                        <TreeItem value="Вся почта"/>&ndash;&gt;-->
+                                            <!--                                                &lt;!&ndash;                                                        <TreeItem value="Входящие"/>&ndash;&gt;-->
+                                            <!--                                                &lt;!&ndash;                                                        <TreeItem value="Исходящие"/>&ndash;&gt;-->
+                                            <!--                                                &lt;!&ndash;                                                        <TreeItem value="Черновики"/>&ndash;&gt;-->
+                                            <!--                                                &lt;!&ndash;                                                        <TreeItem value="Папки"/>&ndash;&gt;-->
+                                            <!--                                                &lt;!&ndash;                                                    </children>&ndash;&gt;-->
+                                            <!--                                                </TreeItem>-->
+                                            <!--                                                <TreeItem value="Теги">-->
 
-<!--                                                </TreeItem>-->
-<!--                                            </children>-->
+                                            <!--                                                </TreeItem>-->
+                                            <!--                                            </children>-->
                                         </TreeItem>
                                     </TreeView>
                                 </VBox>
                                 <VBox maxWidth="1.7976931348623157E308" minWidth="100.0">
                                     <children>
-                                        <HBox>
+                                        <HBox styleClass="mail-list-toolbar">
                                             <children>
-                                                <Button alignment="CENTER" mnemonicParsing="false"
-                                                        onAction="#handleClick" prefHeight="25.0" prefWidth="71.0"
-                                                        text="Refresh" textAlignment="CENTER"/>
+                                                <Button fx:id="refreshButton" mnemonicParsing="false"
+                                                        onAction="#handleClick"
+                                                        styleClass="toolbar-button icon-only"
+                                                        HBox.hgrow="NEVER">
+                                                    <graphic>
+                                                        <FontIcon iconLiteral="fth-refresh-cw" iconSize="18"/>
+                                                    </graphic>
+                                                </Button>
+                                                <Label mouseTransparent="true" styleClass="inline-icon-label">
+                                                    <graphic>
+                                                        <FontIcon iconLiteral="fth-sliders" iconSize="16"/>
+                                                    </graphic>
+                                                </Label>
+                                                <ChoiceBox fx:id="sortChoice" prefWidth="150.0"/>
                                             </children>
                                         </HBox>
                                         <ListView fx:id="emailsList" VBox.vgrow="ALWAYS"/>

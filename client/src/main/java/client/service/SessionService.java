@@ -57,11 +57,11 @@ public class SessionService {
 
     public void resetSession() {
         Platform.runLater(() -> {
-                this.currentUser.set(null);
-                this.accessToken = null;
-                this.refreshToken = null;
-                this.savedUserId = null;
-            }
+                    this.currentUser.set(null);
+                    this.accessToken = null;
+                    this.refreshToken = null;
+                    this.savedUserId = null;
+                }
         );
     }
 
@@ -85,6 +85,11 @@ public class SessionService {
 
     public ObjectProperty<User> getCurrentUser() {
         return currentUser;
+    }
+
+    public UUID getCurrentUserId() {
+        var user = currentUser.get();
+        return user == null ? null : user.getUserId();
     }
 
     public String getAccessToken() {

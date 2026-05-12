@@ -20,8 +20,8 @@ public class EmailViewModel {
     private StringProperty body = new SimpleStringProperty();
     private BooleanProperty isRead = new SimpleBooleanProperty();
 
-    private ObjectProperty<Object> onReply = new SimpleObjectProperty<>();
-    private ObjectProperty<Object> onForward = new SimpleObjectProperty<>();
+    private ObjectProperty<Email> onReply = new SimpleObjectProperty<>();
+    private ObjectProperty<Email> onForward = new SimpleObjectProperty<>();
 
     public EmailViewModel(EmailService emailService, SessionService sessionService, Email email){
         this.emailService = emailService;
@@ -58,11 +58,19 @@ public class EmailViewModel {
         return body;
     }
 
+    public ObjectProperty<Email> getOnReply() {
+        return onReply;
+    }
+
+    public ObjectProperty<Email> getOnForward() {
+        return onForward;
+    }
+
     public void onReplyClicked() {
-        onReply.set(new Object());
+        onReply.set(email);
     }
 
     public void onForwardClicked() {
-        onForward.set(new Object());
+        onForward.set(email);
     }
 }

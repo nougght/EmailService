@@ -86,6 +86,14 @@ public class Email implements EmailItem {
 
     public void setSenderId(UUID senderId) {this.senderId = senderId;}
 
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
     public void setSenderUsername(String senderUsername) {
         this.senderUsername = senderUsername;
     }
