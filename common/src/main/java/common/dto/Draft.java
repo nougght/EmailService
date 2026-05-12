@@ -1,19 +1,22 @@
 package common.dto;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class Draft implements EmailItem{
     private UUID draftId;
     private UUID senderId;
-    private List<String> recipients;
+    private List<String> recipients = new ArrayList<>();
     private String subject;
     private String body;
     private OffsetDateTime updatedAt;
     private OffsetDateTime createdAt;
 
-    public Draft() {}
+    public Draft() {
+        recipients = new ArrayList<>();
+    }
     public Draft(UUID draftId, UUID senderId, List<String> recipients, String subject, String body,
                  OffsetDateTime updatedAt, OffsetDateTime createdAt) {
         this.draftId = draftId;

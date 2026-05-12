@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class NavigationService {
     private final AuthService authService;
@@ -78,6 +79,7 @@ public class NavigationService {
         addNewEmailWindow(draft);
     };
 
+    // ответ на письмо
     private ChangeListener<Email> onReplyListener = (_, _, email) -> {
         var draft = new Draft();
         draft.setSenderId(sessionService.getCurrentUserId());
@@ -87,7 +89,7 @@ public class NavigationService {
         } else {  // если исходящее, добавляем тех же получателей
             draft.setRecipients(email.getRecipients().stream().map(EmailRecipientDTO::getUsername).toList());
         }
-        email.setSubject(String.format("Re: %s", draft.getSubject()));
+        draft.setSubject(String.format("Re: %s", email.getSubject()));
 
 
         String body = String.format("-----\n%s, %s:\n%s",
@@ -99,11 +101,27 @@ public class NavigationService {
         addNewEmailWindow(draft);
     };
 
-//    private final ChangeListener<Email> onOpenDraftListener = (_, _, email) -> {
-//        if (draft == null)
-//            return;
-//        addNewEmailWindow(draft);
-//    };
+    // пересылка письма
+    private final ChangeListener<Email> onForwardListener = (_, _, email) -> {
+        var draft = new Draft();
+        draft.setSenderId(sessionService.getCurrentUserId());
+
+        draft.setSubject(String.format("Fwd: %s", email.getSubject()));
+
+
+        String body = String.format("-----\nFrom: %s\nDate: %s\nSubject:%s\nTo:%s\n\n%s",
+                email.getSenderUsername(),
+                email.getSentAt().toLocalDate().format(DateTimeFormatter.ofPattern("dd MM yyyy")),
+                email.getSubject(),
+                email.getRecipients().stream()
+                        .map(EmailRecipientDTO::getUsername)
+                        .collect(Collectors.joining(", ")),
+                email.getBody()
+        );
+        draft.setBody(String.format("\n\n\n%s", body));
+        addNewEmailWindow(draft);
+    };
+
 
     public Pair<Parent, Object> getOrCreateView(String name) {
         try {
@@ -204,6 +222,7 @@ public class NavigationService {
             EmailViewModel emailVM = new EmailViewModel(emailService, sessionService, optionalEmail.get());
             // to do: reply and forward buttons handling
             emailVM.getOnReply().addListener(onReplyListener);
+            emailVM.getOnForward().addListener(onForwardListener);
             contr.setViewModel(emailVM);
             splitPane.getItems().set(2, emailView);
 
