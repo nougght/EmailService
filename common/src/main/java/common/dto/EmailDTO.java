@@ -19,10 +19,11 @@ public class EmailDTO {
     private boolean isRead;
 
     public EmailDTO(){}
-    public EmailDTO(UUID email_id, UUID sender_id, List<EmailRecipientDTO> recipients,
+    public EmailDTO(UUID email_id, UUID sender_id, String senderUsername, List<EmailRecipientDTO> recipients,
                     String subject, String body, OffsetDateTime sent_at, String folder, boolean isRead) {
         this.emailId = email_id;
         this.senderId = sender_id;
+        this.senderUsername = senderUsername;
         this.recipients = recipients;
         this.subject = subject;
         this.body = body;

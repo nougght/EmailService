@@ -11,6 +11,7 @@ public class EmailMapper {
         var dto = new EmailDTO(
                 email.getEmailId(),
                 email.getSenderId().orElse(null),
+                email.getSenderUsername(),
                 email.getRecipients().stream().map(EmailRecipientMapper::toDto).toList(),
                 email.getSubject(),
                 email.getBody(),
